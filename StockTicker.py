@@ -24,7 +24,7 @@ def welcomeMsg():
 def createPlayers(player):
     ask = True
     while ask is True:
-        num_players = input("Please choose between 2 and 8 players.\n")
+        num_players = input("Please choose between 2 to 8 players.\n")
         ask = False if num_players.isdigit() and 2 <= int(num_players) <= 8 else True
     for _ in range(int(num_players)):
         players.append(player_stats.copy())
