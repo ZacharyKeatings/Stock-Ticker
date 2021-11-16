@@ -13,7 +13,7 @@ The object of the game is to buy and sell stocks, and by so doing accumulate a g
 
 #### Project Status:
 
-This is an ongoing project which wil be updated as I learn more about Python.
+This is an ongoing project which will be updated as I learn more about Python.
 
 #### To-Do:
 
