@@ -99,8 +99,6 @@ stock5 = Stock(Stock.stock_list[4])
 stock6 = Stock(Stock.stock_list[5])
 ##########
 
-print(Dice.stock_name)
-
 ##########
 #Create the player placeholder:
 # player1 = Player()
