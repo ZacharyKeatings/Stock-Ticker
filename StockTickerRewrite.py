@@ -1,3 +1,5 @@
+import random
+
 class Player:
     "Player stats"
 
@@ -67,12 +69,11 @@ class Dice:
     action = ["Up", "Down", "Dividend"]
     amount = [5, 10, 20]
 
-    def __init__(self, name, value = 100):
-        self.name = name
-        self.value = value
-
     def roll():
-        pass
+        stock = random.choice(Dice.stock_name)
+        action = random.choice(Dice.action)
+        amount = random.choice(Dice.amount)
+        print(stock, action, amount)
 
 #test = ask_question("What question?", ["y","n"])
 def ask_question(question, answers=None):
@@ -98,6 +99,8 @@ stock4 = Stock(Stock.stock_list[3])
 stock5 = Stock(Stock.stock_list[4])
 stock6 = Stock(Stock.stock_list[5])
 ##########
+
+Dice.roll()
 
 ##########
 #Create the player placeholder:
