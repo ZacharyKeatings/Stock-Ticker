@@ -1,6 +1,6 @@
 class Player:
     "Player stats"
-    players = []
+
     #stocks refer to quantity of given stock. money is available money. name is chosen by user
     def __init__(self, name = "", money = 5000, gold = 0, silver = 0, oil = 0, bonds = 0, grain = 0, industrial = 0):
         self.name = name
@@ -26,14 +26,19 @@ class Player:
         name = ask_question(f"What is {player}'s name?\n")
         return name
 
-    def buy_stock(stock, amount):
+    #provide the (stock name, price of stock, amount of money player has) 
+    def buy_stock(stock, cost, player_money):
         pass
 
-    def sell_stock(stock, amount):
+    #provide the (stock name, price of stock, amount of stock player has)
+    def sell_stock(stock, cost, player_quantity):
         pass
 
 class Stock:
     "Stock value"
+
+    #Change stock names here:
+    stock_list = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
 
     def __init__(self, name, value = 100):
         self.name = name
@@ -58,7 +63,7 @@ class Stock:
 class Dice:
     "Dice properties"
 
-    stock_name = []
+    stock_name = Stock.stock_list
     action = ["Up", "Down", "Dividend"]
     amount = [5, 10, 20]
 
@@ -84,11 +89,34 @@ def ask_question(question, answers=None):
 #if yes, call create_bots()
 #if no, call create_humans()
 
+##########
+#Create the stocks:
+stock1 = Stock(Stock.stock_list[0])
+stock2 = Stock(Stock.stock_list[1])
+stock3 = Stock(Stock.stock_list[2])
+stock4 = Stock(Stock.stock_list[3])
+stock5 = Stock(Stock.stock_list[4])
+stock6 = Stock(Stock.stock_list[5])
+##########
+
+print(Dice.stock_name)
+
+##########
+#Create the player placeholder:
+# player1 = Player()
+# player2 = Player()
+# player3 = Player()
+# player4 = Player()
+# player5 = Player()
+# player6 = Player()
+# player7 = Player()
+# player8 = Player()
+##########
+
 human_players = 5
 bot_players = 0
 total_players = human_players + bot_players
 current_player = 1
-print(Stock.gold)
 
 #Creating number of players as chosen by user based on Player class, as well as choosing names.
 while current_player <= total_players:
