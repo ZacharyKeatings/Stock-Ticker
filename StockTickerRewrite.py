@@ -12,13 +12,15 @@ class Player:
         self.grain = grain
         self.industrial = industrial
 
-    #Creates user chosen number of bots (0 - 8)
-    def create_bots(num_bots):
-        pass
+    #Creates user chosen number of bots (1 - 8)
+    def create_bots():
+        num_bots = ask_question("How many bots would you like to play? Choose between 1 - 8.\n", range(1, 8))
+        return num_bots
 
     #Creates user chosen number of human players (2 to 8)
-    def create_humans(num_humans):
-        pass
+    def create_humans():
+        num_humans = ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
+        return num_humans
 
     def name_players(player):
         name = ask_question(f"What is {player}'s name?\n")
@@ -30,32 +32,27 @@ class Player:
     def sell_stock(stock, amount):
         pass
 
-    
-
 class Stock:
     "Stock value"
-
-    gold_value = 100
-    silver_value = 100
-    oil_value = 100
-    bonds_value = 100
-    grain_value = 100
-    industrial_value = 100
 
     def __init__(self, name, value = 100):
         self.name = name
         self.value = value
 
-    def increase_value(stock):
+    def increase_value(stock, amount):
+        #If stock value >= 200, double_stock(stock)
         pass
 
-    def decrease_value(stock):
+    def decrease_value(stock, amount):
+        #If stock value <= 0, split_stock(stock)
         pass
 
     def double_stock(stock):
+        #stock value reset to 100 (default), double quantity of players holding stock
         pass
 
     def split_stock(stock):
+        #stock value reset to 100 (default), set quantity to 0 of players holding stock
         pass
 
 class Dice:
@@ -87,14 +84,14 @@ def ask_question(question, answers=None):
 #if yes, call create_bots()
 #if no, call create_humans()
 
-human_players = 0
+human_players = 5
 bot_players = 0
-num_players = 5 #Add human and bot for this value in the future
+total_players = human_players + bot_players
 current_player = 1
 print(Stock.gold)
+
 #Creating number of players as chosen by user based on Player class, as well as choosing names.
-#try using for loop and replace player# with i placeholder. shorter code?
-while current_player <= num_players:
+while current_player <= total_players:
     if current_player == 1:
         #Player 1
         player1 = Player()
