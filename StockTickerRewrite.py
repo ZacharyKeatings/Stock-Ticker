@@ -143,6 +143,30 @@ class Menu:
     action = ["Buy", "Sell", "Done", ""]
     amount = [range(1-1000)]
 
+    #Displays opening message with basic game rules
+    def welcome_message():
+        pass
+
+    #Displays current players stats
+    def player_info(player):
+
+        p_amount = vars(Player.players[player])
+        quantity = []
+        for key, value in p_amount.items():
+            if key != "name":
+                quantity.append(value)
+        
+        print(f"{Player.players[player].name}'s Stats:")
+        print(f"Money{str(quantity[0]).rjust(10,'-')}")
+        for i in range(0, len(Stock.stock_name)):
+            print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{quantity[i+1]}")
+
+    #Displays current stock prices
+    def stock_info():
+        print("Stock Prices:")
+        for i in range(0, len(Stock.stock_name)):
+            print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{Stock.stocks[i].value}")
+
     def main_screen():
         pass
 
@@ -158,4 +182,10 @@ class Menu:
         return response
 
 Stock.create_stocks()
-Dice.roll()
+Player.name_player(0,2)
+Menu.stock_info()
+Menu.player_info(1)    
+
+# Menu.player_info(1)
+# Dice.roll()
+
