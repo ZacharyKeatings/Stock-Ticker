@@ -24,6 +24,7 @@ class Player:
         num_humans = ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
         return num_humans
 
+    #Allows user to customize name of current player
     def name_players(player):
         name = ask_question(f"What is {player}'s name?\n")
         return name
@@ -42,25 +43,100 @@ class Stock:
     #Change stock names here:
     stock_list = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
 
+    #Set stock starting cost here:
     def __init__(self, name, value = 100):
         self.name = name
         self.value = value
 
+    #Called from roll(), handles adding to stock value
     def increase_value(stock, amount):
-        #If stock value >= 200, double_stock(stock)
         print("now in increase_value()")
+        if stock == Stock.stock_list[0]:
+            print("Now in increase_value(Gold)")
+            stock1.value = stock1.value + amount
+            print(stock1.value)
+            if stock1.value > 195:
+                Stock.double_stock(stock)
+        elif stock == Stock.stock_list[1]:
+            print("Now in increase_value(Silver)")
+            stock2.value = stock2.value + amount
+            print(stock2.value)
+            if stock2.value > 195:
+                Stock.double_stock(stock)
+        elif stock == Stock.stock_list[2]:
+            print("Now in increase_value(Oil)")
+            stock3.value = stock3.value + amount
+            print(stock3.value)
+            if stock3.value > 195:
+                Stock.double_stock(stock)
+        elif stock == Stock.stock_list[3]:
+            print("Now in increase_value(Bonds)")
+            stock4.value = stock4.value + amount
+            print(stock4.value)
+            if stock4.value > 195:
+                Stock.double_stock(stock)
+        elif stock == Stock.stock_list[4]:
+            print("Now in increase_value(Grain)")
+            stock5.value = stock5.value + amount
+            print(stock5.value)
+            if stock5.value > 195:
+                Stock.double_stock(stock)
+        else:
+            print("Now in increase_value(Industrial)")
+            stock6.value = stock6.value + amount
+            print(stock6.value)
+            if stock6.value > 195:
+                Stock.double_stock(stock)
 
-        def double_stock(stock):
-            #stock value reset to 100 (default), double quantity of players holding stock
-            pass
+    #Called from increase_value(), handles doubling player held stock quantities
+    def double_stock(stock):
+        #stock value reset to 100 (default), double quantity of players holding stock
+        print("Now in double_stock()")
 
+    #Called from roll(), handles subtracting from stock value
     def decrease_value(stock, amount):
-        #If stock value <= 0, split_stock(stock)
         print("Now in decrease_value()")
+        if stock == Stock.stock_list[0]:
+            print("Now in decrease_value(Gold)")
+            stock1.value = stock1.value - amount
+            print(stock1.value)
+            if stock1.value < 5:
+                Stock.split_stock(stock)
+        elif stock == Stock.stock_list[1]:
+            print("Now in decrease_value(Silver)")
+            stock2.value = stock2.value - amount
+            print(stock2.value)
+            if stock2.value < 5:
+                Stock.split_stock(stock)
+        elif stock == Stock.stock_list[2]:
+            print("Now in decrease_value(Oil)")
+            stock3.value = stock3.value - amount
+            print(stock3.value)
+            if stock3.value < 5:
+                Stock.split_stock(stock)
+        elif stock == Stock.stock_list[3]:
+            print("Now in decrease_value(Bonds)")
+            stock4.value = stock4.value - amount
+            print(stock4.value)
+            if stock4.value < 5:
+                Stock.split_stock(stock)
+        elif stock == Stock.stock_list[4]:
+            print("Now in decrease_value(Grain)")
+            stock5.value = stock5.value - amount
+            print(stock5.value)
+            if stock5.value < 5:
+                Stock.split_stock(stock)
+        else:
+            print("Now in decrease_value(Industrial)")
+            stock6.value = stock6.value - amount
+            print(stock6.value)
+            if stock6.value < 5:
+                Stock.split_stock(stock)
 
-        def split_stock(stock):
-            #stock value reset to 100 (default), set quantity to 0 of players holding stock
-            pass
+    #Called from decrease_value(), handles removing all of selected stock from player inventory
+    def split_stock(stock):
+        #stock value reset to 100 (default), set quantity to 0 of players holding stock
+        print("Now in split_stock()")
 
     def dividend(stock, amount):
         #all players with selected stock get quantity multiplied by amount
@@ -88,6 +164,11 @@ class Dice:
         else:
             Stock.dividend(stock, amount)
 
+class Menu:
+    
+    def main_screen():
+        pass
+
 #test = ask_question("What question?", ["y","n"])
 def ask_question(question, answers=None):
     asking = True
@@ -100,95 +181,92 @@ def ask_question(question, answers=None):
     return response
 
 #This is a temporary function for debugging
-def game():
-    ##########
-    #Create the stocks:
-    stock1 = Stock(Stock.stock_list[0])
-    stock2 = Stock(Stock.stock_list[1])
-    stock3 = Stock(Stock.stock_list[2])
-    stock4 = Stock(Stock.stock_list[3])
-    stock5 = Stock(Stock.stock_list[4])
-    stock6 = Stock(Stock.stock_list[5])
-    ##########
+##########
+#Create the stocks:
+stock1 = Stock(Stock.stock_list[0])
+stock2 = Stock(Stock.stock_list[1])
+stock3 = Stock(Stock.stock_list[2])
+stock4 = Stock(Stock.stock_list[3])
+stock5 = Stock(Stock.stock_list[4])
+stock6 = Stock(Stock.stock_list[5])
+##########
 
-    Dice.roll()
+Dice.roll()
 
-    ##########
-    #Create the player placeholder:
-    player1 = Player()
-    player2 = Player()
-    player3 = Player()
-    player4 = Player()
-    player5 = Player()
-    player6 = Player()
-    player7 = Player()
-    player8 = Player()
-    ##########
+##########
+#Create the player placeholder:
+player1 = Player()
+player2 = Player()
+player3 = Player()
+player4 = Player()
+player5 = Player()
+player6 = Player()
+player7 = Player()
+player8 = Player()
+##########
 
-    human_players = 0
-    bot_players = 0
-    total_players = human_players + bot_players
-    current_player = 1
+human_players = 0
+bot_players = 0
+total_players = human_players + bot_players
+current_player = 1
 
-    #Creating number of players as chosen by user based on Player class, as well as choosing names.
-    while current_player <= total_players:
-        if current_player == 1:
-            #Player 1
-            player1 = Player()
-            player1.name = Player.name_players("Player 1")
-            print(f"{player1.name} has {player1.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 2:
-            #player 2
-            player2 = Player()
-            player2.name = Player.name_players("Player 2")
-            print(f"{player2.name} has {player2.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 3:
-            #Player 3
-            player3 = Player()
-            player3.name = Player.name_players("Player 3")
-            print(f"{player3.name} has {player3.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 4:
-            #Player 4
-            player4 = Player()
-            player4.name = Player.name_players("Player 4")
-            print(f"{player4.name} has {player4.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 5:
-            #Player 5
-            player5 = Player()
-            player5.name = Player.name_players("Player 5")
-            print(f"{player5.name} has {player5.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 6:
-            #Player 6
-            player6 = Player()
-            player6.name = Player.name_players("Player 6")
-            print(f"{player6.name} has {player6.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 7:
-            #Player 7
-            player7 = Player()
-            player7.name = Player.name_players("Player 7")
-            print(f"{player7.name} has {player7.money} bucks.")
-            current_player += 1
-            print(f"{current_player}")
-        elif current_player == 8:
-            #Player 8
-            player8 = Player()
-            player8.name = Player.name_players("Player 8")
-            print(f"{player8.name} has {player8.money} bucks.")
-            print(f"{current_player}")
-            current_player += 1
-        else:
-            break
-
-game()
+#Creating number of players as chosen by user based on Player class, as well as choosing names.
+while current_player <= total_players:
+    if current_player == 1:
+        #Player 1
+        player1 = Player()
+        player1.name = Player.name_players("Player 1")
+        print(f"{player1.name} has {player1.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 2:
+        #player 2
+        player2 = Player()
+        player2.name = Player.name_players("Player 2")
+        print(f"{player2.name} has {player2.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 3:
+        #Player 3
+        player3 = Player()
+        player3.name = Player.name_players("Player 3")
+        print(f"{player3.name} has {player3.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 4:
+        #Player 4
+        player4 = Player()
+        player4.name = Player.name_players("Player 4")
+        print(f"{player4.name} has {player4.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 5:
+        #Player 5
+        player5 = Player()
+        player5.name = Player.name_players("Player 5")
+        print(f"{player5.name} has {player5.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 6:
+        #Player 6
+        player6 = Player()
+        player6.name = Player.name_players("Player 6")
+        print(f"{player6.name} has {player6.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 7:
+        #Player 7
+        player7 = Player()
+        player7.name = Player.name_players("Player 7")
+        print(f"{player7.name} has {player7.money} bucks.")
+        current_player += 1
+        print(f"{current_player}")
+    elif current_player == 8:
+        #Player 8
+        player8 = Player()
+        player8.name = Player.name_players("Player 8")
+        print(f"{player8.name} has {player8.money} bucks.")
+        print(f"{current_player}")
+        current_player += 1
+    else:
+        break
