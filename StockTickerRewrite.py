@@ -47,7 +47,13 @@ class Player:
             print("You can't afford any stocks")
         else:
             buy = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name)
-            
+            # Show max amount of shares purchaseable by player. 
+            # if < 1, print you can't afford this stock
+            # if >= 1, print total shares that can be bought
+            # user puts in number
+            # calculate total cost
+            # remove money from player
+            # add number to player stock quantity
 
     #provide the (stock name, price of stock, amount of stock player has)
     def sell_stock(stock, cost, player):
@@ -58,7 +64,7 @@ class Stock:
 
     #Change stock names here:
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
-    
+
     #All stock data goes here after create_stocks() runs
     stocks = []
 
