@@ -51,6 +51,7 @@ class Stock:
 
     #Change stock names here:
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
+    #All stock data goes here after create_stocks() runs
     stocks = []
 
     #Set stock starting cost here:
@@ -60,7 +61,7 @@ class Stock:
 
     #Create list of stocks with data based on Stock class
     def create_stocks():
-        for num in range(0, 5):
+        for num in range(0, 6):
             print(f"Now working on {Stock.stock_name[num]}")
             stock = Stock(name=Stock.stock_name[num])
             Stock.stocks.append(stock)
@@ -68,95 +69,31 @@ class Stock:
 
     #Called from roll(), handles adding to stock value
     def increase_value(stock, amount):
-
+        stock_index = Stock.stock_name.index(stock)
         #Called from increase_value(), handles doubling player held stock quantities
         def double_stock(stock):
             #stock value reset to 100 (default), double quantity of players holding stock
             print("Now in double_stock()")
 
         print("now in increase_value()")
-        if stock == Stock.stock_name[0]:
-            print("Now in increase_value(Gold)")
-            stock1.value = stock1.value + amount
-            print(stock1.value)
-            if stock1.value > 195:
-                double_stock(stock)
-        elif stock == Stock.stock_name[1]:
-            print("Now in increase_value(Silver)")
-            stock2.value = stock2.value + amount
-            print(stock2.value)
-            if stock2.value > 195:
-                double_stock(stock)
-        elif stock == Stock.stock_name[2]:
-            print("Now in increase_value(Oil)")
-            stock3.value = stock3.value + amount
-            print(stock3.value)
-            if stock3.value > 195:
-                double_stock(stock)
-        elif stock == Stock.stock_name[3]:
-            print("Now in increase_value(Bonds)")
-            stock4.value = stock4.value + amount
-            print(stock4.value)
-            if stock4.value > 195:
-                double_stock(stock)
-        elif stock == Stock.stock_name[4]:
-            print("Now in increase_value(Grain)")
-            stock5.value = stock5.value + amount
-            print(stock5.value)
-            if stock5.value > 195:
-                double_stock(stock)
-        else:
-            print("Now in increase_value(Industrial)")
-            stock6.value = stock6.value + amount
-            print(stock6.value)
-            if stock6.value > 195:
-                double_stock(stock)
+        
+        Stock.stocks[stock_index].value = Stock.stocks[stock_index].value + amount
+        if Stock.stocks[stock_index].value > 195:
+            double_stock(stock)
 
     #Called from roll(), handles subtracting from stock value
     def decrease_value(stock, amount):
-
+        stock_index = Stock.stock_name.index(stock)
         #Called from decrease_value(), handles removing all of selected stock from player inventory
         def split_stock(stock):
             #stock value reset to 100 (default), set quantity to 0 of players holding stock
             print("Now in split_stock()")
 
         print("Now in decrease_value()")
-        if stock == Stock.stock_name[0]:
-            print("Now in decrease_value(Gold)")
-            stock1.value = stock1.value - amount
-            print(stock1.value)
-            if stock1.value < 5:
-                split_stock(stock)
-        elif stock == Stock.stock_name[1]:
-            print("Now in decrease_value(Silver)")
-            stock2.value = stock2.value - amount
-            print(stock2.value)
-            if stock2.value < 5:
-                split_stock(stock)
-        elif stock == Stock.stock_name[2]:
-            print("Now in decrease_value(Oil)")
-            stock3.value = stock3.value - amount
-            print(stock3.value)
-            if stock3.value < 5:
-                split_stock(stock)
-        elif stock == Stock.stock_name[3]:
-            print("Now in decrease_value(Bonds)")
-            stock4.value = stock4.value - amount
-            print(stock4.value)
-            if stock4.value < 5:
-                split_stock(stock)
-        elif stock == Stock.stock_name[4]:
-            print("Now in decrease_value(Grain)")
-            stock5.value = stock5.value - amount
-            print(stock5.value)
-            if stock5.value < 5:
-                split_stock(stock)
-        else:
-            print("Now in decrease_value(Industrial)")
-            stock6.value = stock6.value - amount
-            print(stock6.value)
-            if stock6.value < 5:
-                split_stock(stock)
+        Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - amount
+        print(Stock.stocks[stock_index].value)
+        if Stock.stocks[stock_index].value < 5:
+            split_stock(stock)
 
     def dividend(stock, amount):
         #all players with selected stock get quantity multiplied by amount
@@ -169,7 +106,7 @@ class Dice:
     action = ["Up", "Down", "Dividend"]
     amount = [5, 10, 20]
 
-    #Rolls 3 dice and prints the results to the screen.
+    #Rolls 3 dice (stock_name, action, amount) and prints the results to the screen.
     def roll():
         stock = random.choice(Dice.stock_name)
         action = random.choice(Dice.action)
@@ -204,22 +141,5 @@ def ask_question(question, answers=None):
             asking = False if response not in answers else True
     return response
 
-#This is a temporary function for debugging
-##########
-#Create the stocks:
-stock1 = Stock(Stock.stock_name[0])
-stock2 = Stock(Stock.stock_name[1])
-stock3 = Stock(Stock.stock_name[2])
-stock4 = Stock(Stock.stock_name[3])
-stock5 = Stock(Stock.stock_name[4])
-stock6 = Stock(Stock.stock_name[5])
-##########
-
 Stock.create_stocks()
-
-# Dice.roll()
-
-# human_players = 0
-# bot_players = 0
-# total_players = human_players + bot_players
-# current_player = 1
+Dice.roll()
