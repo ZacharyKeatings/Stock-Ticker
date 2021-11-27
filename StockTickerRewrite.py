@@ -20,30 +20,37 @@ class Player:
 
     #Creates user chosen number of bots (1 - 8)
     def create_bots():
-        num_bots = ask_question("How many bots would you like to play? Choose between 1 - 8.\n", range(1, 8))
+        num_bots = Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", range(1, 8))
         return num_bots
 
     #Creates user chosen number of human players (2 to 8)
     def create_humans():
-        num_humans = ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
+        num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
         return num_humans
 
     #Creates names for all bot + human players
-    def name_player(total_players):
-        total_players = 5
+    def name_player(num_bots, num_humans):
+        total_players = num_bots + num_humans
         for num in range(1, total_players+1):
-            # player = Player(name=f"Player {num}")
-            player = Player(name=ask_question(f"What is Player {num}'s name?\n"))
+            player = Player(name=Menu.ask_question(f"What is Player {num}'s name?\n"))
             print(f"{player.name} has {player.money} bucks.")
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
 
     #provide the (stock name, price of stock, amount of money player has) 
-    def buy_stock(stock, cost, player_money):
-        pass
+    def buy_stock(stock, cost, player):
+        current_prices = []
+        for num in range(0, 6):
+            stock_price = Stock.stocks[num].value
+            Player.current_prices.append(stock_price)
+        if Player.players[player].money < min(current_prices):
+            print("You can't afford any stocks")
+        else:
+            buy = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name)
+            
 
     #provide the (stock name, price of stock, amount of stock player has)
-    def sell_stock(stock, cost, player_quantity):
+    def sell_stock(stock, cost, player):
         pass
 
 class Stock:
@@ -51,6 +58,7 @@ class Stock:
 
     #Change stock names here:
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
+    
     #All stock data goes here after create_stocks() runs
     stocks = []
 
@@ -70,6 +78,7 @@ class Stock:
     #Called from roll(), handles adding to stock value
     def increase_value(stock, amount):
         stock_index = Stock.stock_name.index(stock)
+
         #Called from increase_value(), handles doubling player held stock quantities
         def double_stock(stock):
             #stock value reset to 100 (default), double quantity of players holding stock
@@ -84,6 +93,7 @@ class Stock:
     #Called from roll(), handles subtracting from stock value
     def decrease_value(stock, amount):
         stock_index = Stock.stock_name.index(stock)
+
         #Called from decrease_value(), handles removing all of selected stock from player inventory
         def split_stock(stock):
             #stock value reset to 100 (default), set quantity to 0 of players holding stock
@@ -130,16 +140,16 @@ class Menu:
     def main_screen():
         pass
 
-#test = ask_question("What question?", ["y","n"])
-def ask_question(question, answers=None):
-    asking = True
-    while asking:
-        response = input(f"{question}")
-        if answers is None:
-            return response
-        else:
-            asking = False if response not in answers else True
-    return response
+    #test = ask_question("What question?", ["y","n"])
+    def ask_question(question, answers=None):
+        asking = True
+        while asking:
+            response = input(f"{question}")
+            if answers is None:
+                return response
+            else:
+                asking = False if response not in answers else True
+        return response
 
 Stock.create_stocks()
 Dice.roll()
