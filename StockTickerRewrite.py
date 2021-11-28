@@ -158,16 +158,17 @@ class Menu:
         
         print(f"{Player.players[player].name}'s Stats:")
         print(f"Money{str(quantity[0]).rjust(10,'-')}")
-        for i in range(0, len(Stock.stock_name)):
+        for i, v in enumerate(Stock.stock_name):
             print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{quantity[i+1]}")
 
     #Displays current stock prices
     def stock_info():
         print("Stock Prices:")
-        for i in range(0, len(Stock.stock_name)):
+        for i, v in enumerate(Stock.stock_name):
             print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{Stock.stocks[i].value}")
 
-    def main_screen():
+    def set_rounds():
+        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
         pass
 
     #test = ask_question("What question?", ["y","n"])
@@ -181,11 +182,10 @@ class Menu:
                 asking = False if response not in answers else True
         return response
 
+
 Stock.create_stocks()
 Player.name_player(0,2)
 Menu.stock_info()
 Menu.player_info(1)    
 
-# Menu.player_info(1)
-# Dice.roll()
-
+#CHANGE: list comprehension for any empty lists using standard for loops
