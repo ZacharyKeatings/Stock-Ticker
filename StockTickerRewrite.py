@@ -1,4 +1,5 @@
 import random
+import math
 
 class Player:
     "Player stats"
@@ -14,9 +15,6 @@ class Player:
         self.bonds = bonds
         self.grain = grain
         self.industrial = industrial
-
-        #Subclass Humans
-        #Subclass Bots
 
     #Creates user chosen number of bots (1 - 8)
     def create_bots():
@@ -46,17 +44,28 @@ class Player:
         if Player.players[player].money < min(current_prices):
             print("You can't afford any stocks")
         else:
-            buy = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name)
-            # Show max amount of shares purchaseable by player. 
-            # if < 1, print you can't afford this stock
-            # if >= 1, print total shares that can be bought
-            # user puts in number
-            # calculate total cost
-            # remove money from player
+            buy_name = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name).capitalize()
+            max_purchase = math.trunc(Player.players[player].money/stock_price)
+            print(f"You can buy {max_purchase} share(s) of {stock}.")
+            buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
+            cost = buy_number * stock_price
+            Player.players[player].money -= cost
             # add number to player stock quantity
 
     #provide the (stock name, price of stock, amount of stock player has)
     def sell_stock(stock, cost, player):
+        pass
+
+class Bot(Player):
+    "All actions for bots"
+
+    def __init__(self):
+        pass
+
+    def buy_stock():
+        pass
+    
+    def sell_stock():
         pass
 
 class Stock:
@@ -69,7 +78,7 @@ class Stock:
     stocks = []
 
     #Set stock starting cost here:
-    def __init__(self, name, value = 195):
+    def __init__(self, name, value = 100):
         self.name = name
         self.value = value
 
@@ -149,7 +158,6 @@ class Menu:
 
     #Displays current players stats
     def player_info(player):
-
         p_amount = vars(Player.players[player])
         quantity = []
         for key, value in p_amount.items():
@@ -169,7 +177,7 @@ class Menu:
 
     def set_rounds():
         rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
-        pass
+        return rounds
 
     #test = ask_question("What question?", ["y","n"])
     def ask_question(question, answers=None):
@@ -181,7 +189,6 @@ class Menu:
             else:
                 asking = False if response not in answers else True
         return response
-
 
 Stock.create_stocks()
 Player.name_player(0,2)
