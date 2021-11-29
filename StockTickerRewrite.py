@@ -10,7 +10,7 @@ class Player:
         self.name = name
         self.money = money
         self.stocks = {
-            "Gold": 50,
+            "Gold": 0,
             "Silver": 0,
             "Oil": 0,
             "Bonds": 0,
@@ -42,7 +42,7 @@ class Player:
         current_prices = []
         for num in range(0, 6):
             stock_price = Stock.stocks[num].value
-            Player.current_prices.append(stock_price)
+            current_prices.append(stock_price)
         if Player.players[player].money < min(current_prices):
             print("You can't afford any stocks")
         else:
@@ -50,22 +50,27 @@ class Player:
             max_purchase = math.trunc(Player.players[player].money/stock_price)
             print(f"You can buy {max_purchase} share(s) of {buy_name}.")
             buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
+            buy_number = int(buy_number)
             Player.players[player].money -= buy_number * stock_price
             Player.players[player].stocks[buy_name] += buy_number
 
-    #provide the (stock name, price of stock, amount of stock player has)
+    #User can sell any stock they have
     def sell_stock(player):
         can_sell = []
-        for k, v in Player.players[player].stocks:
-            if v > 0:
-                Player.can_sell.append(v)
+        for key in Player.players[player].stocks:
+            value = Player.players[player].stocks[key]
+            if value > 0:
+                can_sell.append(value)
         if can_sell is False:
-            print("Yoou don't have any stocks to sell!")
+            print("You don't have any stocks to sell!")
         else:
             sell_name = Menu.ask_question("Which stock would you like to sell?", can_sell).capitalize()
-            max_sell = Player.players[player].stock[sell_name]
+            sell_index = Stock.stock_name.index(sell_name)
+            max_sell = Player.players[player].stocks[sell_name]
             sell_amount = Menu.ask_question(f"How many shares of {sell_name} do you want to sell?", range(0, max_sell))
-            Player.players[player].money += sell_amount * Stock.stocks[sell_name].value
+            sell_amount = int(sell_amount)
+            Player.players[player].money += sell_amount * Stock.stocks[sell_index].value
+            Player.players[player].stocks[sell_name] -= sell_amount
 
 class Bot(Player):
     "All actions for bots"
@@ -138,13 +143,12 @@ class Stock:
 class Dice:
     "Dice properties"
 
-    stock_name = Stock.stock_name
     action = ["Up", "Down", "Dividend"]
     amount = [5, 10, 20]
 
     #Rolls 3 dice (stock_name, action, amount) and prints the results to the screen.
     def roll():
-        stock = random.choice(Dice.stock_name)
+        stock = random.choice(Stock.stock_name)
         action = random.choice(Dice.action)
         amount = random.choice(Dice.amount)
         print(stock, action, amount)
@@ -169,16 +173,11 @@ class Menu:
 
     #Displays current players stats
     def player_info(player):
-        p_amount = vars(Player.players[player])
-        quantity = []
-        for key, value in p_amount.items():
-            if key != "name":
-                quantity.append(value)
-        
         print(f"{Player.players[player].name}'s Stats:")
-        print(f"Money{str(quantity[0]).rjust(10,'-')}")
-        for i, v in enumerate(Stock.stock_name):
-            print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{quantity[i+1]}")
+        print(f"Money{str(Player.players[player].money).rjust(10, '-')}")
+        for key in Player.players[player].stocks:
+            value = Player.players[player].stocks[key]
+            print(f"{str(key).ljust(10, '-')}-{value}")
 
     #Displays current stock prices
     def stock_info():
@@ -204,6 +203,11 @@ class Menu:
 Stock.create_stocks()
 Player.name_player(0,2)
 Menu.stock_info()
-Menu.player_info(1)    
+Menu.player_info(1)
+print(Stock.stocks[1].name, Stock.stocks[1].value)
+Player.buy_stock(1)
+print(Player.players[1].stocks)
+Player.sell_stock(1)
+print(Player.players[1].stocks)
 
 #CHANGE: list comprehension for any empty lists using standard for loops
