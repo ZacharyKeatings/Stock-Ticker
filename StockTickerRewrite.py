@@ -6,15 +6,17 @@ class Player:
 
     players = []
     #stocks refer to quantity of given stock. money is available money. name is chosen by user
-    def __init__(self, name = "", money = 5000, gold = 0, silver = 0, oil = 0, bonds = 0, grain = 0, industrial = 0):
+    def __init__(self, name = "", money = 5000):
         self.name = name
         self.money = money
-        self.gold = gold
-        self.silver = silver
-        self.oil = oil
-        self.bonds = bonds
-        self.grain = grain
-        self.industrial = industrial
+        self.stocks = {
+            "Gold": 50,
+            "Silver": 0,
+            "Oil": 0,
+            "Bonds": 0,
+            "Grain": 0,
+            "Industrial": 0
+            }
 
     #Creates user chosen number of bots (1 - 8)
     def create_bots():
@@ -36,7 +38,7 @@ class Player:
             Player.players.append(player)
 
     #provide the (stock name, price of stock, amount of money player has) 
-    def buy_stock(stock, cost, player):
+    def buy_stock(player):
         current_prices = []
         for num in range(0, 6):
             stock_price = Stock.stocks[num].value
@@ -46,15 +48,24 @@ class Player:
         else:
             buy_name = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name).capitalize()
             max_purchase = math.trunc(Player.players[player].money/stock_price)
-            print(f"You can buy {max_purchase} share(s) of {stock}.")
+            print(f"You can buy {max_purchase} share(s) of {buy_name}.")
             buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
-            cost = buy_number * stock_price
-            Player.players[player].money -= cost
-            # add number to player stock quantity
+            Player.players[player].money -= buy_number * stock_price
+            Player.players[player].stocks[buy_name] += buy_number
 
     #provide the (stock name, price of stock, amount of stock player has)
-    def sell_stock(stock, cost, player):
-        pass
+    def sell_stock(player):
+        can_sell = []
+        for k, v in Player.players[player].stocks:
+            if v > 0:
+                Player.can_sell.append(v)
+        if can_sell is False:
+            print("Yoou don't have any stocks to sell!")
+        else:
+            sell_name = Menu.ask_question("Which stock would you like to sell?", can_sell).capitalize()
+            max_sell = Player.players[player].stock[sell_name]
+            sell_amount = Menu.ask_question(f"How many shares of {sell_name} do you want to sell?", range(0, max_sell))
+            Player.players[player].money += sell_amount * Stock.stocks[sell_name].value
 
 class Bot(Player):
     "All actions for bots"
@@ -74,7 +85,7 @@ class Stock:
     #Change stock names here:
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
 
-    #All stock data goes here after create_stocks() runs
+    #All stock values during gameplay goes here after create_stocks() runs
     stocks = []
 
     #Set stock starting cost here:
