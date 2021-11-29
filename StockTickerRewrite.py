@@ -33,7 +33,6 @@ class Player:
         total_players = num_bots + num_humans
         for num in range(1, total_players+1):
             player = Player(name=Menu.ask_question(f"What is Player {num}'s name?\n"))
-            print(f"{player.name} has {player.money} bucks.")
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
 
@@ -108,29 +107,31 @@ class Stock:
 
     #Called from roll(), handles adding to stock value
     def increase_value(stock, amount):
-        stock_index = Stock.stock_name.index(stock)
 
         #Called from increase_value(), handles doubling player held stock quantities
         def double_stock(stock):
-            #stock value reset to 100 (default), double quantity of players holding stock
-            print("Now in double_stock()")
+            Stock.stocks[stock].value = 100
+            # Check all players to see who is holding shares of stock
+            # if player has any shares, double amount
+            print(Stock.stocks[stock].value)
 
-        print("now in increase_value()")
-        
+        stock_index = Stock.stock_name.index(stock)       
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value + amount
         if Stock.stocks[stock_index].value > 195:
             double_stock(stock)
 
     #Called from roll(), handles subtracting from stock value
     def decrease_value(stock, amount):
-        stock_index = Stock.stock_name.index(stock)
 
         #Called from decrease_value(), handles removing all of selected stock from player inventory
         def split_stock(stock):
-            #stock value reset to 100 (default), set quantity to 0 of players holding stock
-            print("Now in split_stock()")
+            Stock.stocks[stock].value = 100
+            # Check all players to see who is holding shares of stock
+            # if player has any shares, set to 0
 
-        print("Now in decrease_value()")
+            print(Stock.stocks[stock].value)
+
+        stock_index = Stock.stock_name.index(stock)
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - amount
         print(Stock.stocks[stock_index].value)
         if Stock.stocks[stock_index].value < 5:
@@ -211,3 +212,5 @@ Player.sell_stock(1)
 print(Player.players[1].stocks)
 
 #CHANGE: list comprehension for any empty lists using standard for loops
+#ADD: double_stock()
+#ADD: split_stock()
