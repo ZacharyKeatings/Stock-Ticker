@@ -5,8 +5,9 @@ class Player:
     "Player stats"
 
     players = []
-    #stocks refer to quantity of given stock. money is available money. name is chosen by user
+
     def __init__(self, name = "", money = 5000):
+        """stocks refer to quantity of given stock. money is available money. name is chosen by user"""
         self.name = name
         self.money = money
         self.stocks = {
@@ -18,26 +19,26 @@ class Player:
             "Industrial": 0
             }
 
-    #Creates user chosen number of bots (1 - 8)
     def create_bots():
+        """Creates user selected number of bots (1 - 8)"""
         num_bots = Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", range(1, 8))
         return num_bots
 
-    #Creates user chosen number of human players (2 to 8)
     def create_humans():
+        """Creates user chosen number of human players (2 to 8)"""
         num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
         return num_humans
 
-    #Creates names for all bot + human players
     def name_player(num_bots, num_humans):
+        """Creates names for all bot + human players"""
         total_players = num_bots + num_humans
         for num in range(1, total_players+1):
             player = Player(name=Menu.ask_question(f"What is Player {num}'s name?\n"))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
 
-    #provide the (stock name, price of stock, amount of money player has) 
     def buy_stock(player):
+        """User chooses which stock to buy and the quantity"""
         current_prices = []
         for num in range(0, 6):
             stock_price = Stock.stocks[num].value
@@ -53,8 +54,8 @@ class Player:
             Player.players[player].money -= buy_number * stock_price
             Player.players[player].stocks[buy_name] += buy_number
 
-    #User can sell any stock they have
     def sell_stock(player):
+        """User choose which stock to sell and the quantity"""
         can_sell = []
         for key in Player.players[player].stocks:
             value = Player.players[player].stocks[key]
@@ -88,28 +89,27 @@ class Stock:
 
     #Change stock names here:
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
-
     #All stock values during gameplay goes here after create_stocks() runs
     stocks = []
 
-    #Set stock starting cost here:
     def __init__(self, name, value = 100):
+        """Sets stock name and the stock value"""
         self.name = name
         self.value = value
 
-    #Create list of stocks with data based on Stock class
     def create_stocks():
+        """append Stock.stock with stock names from Stock.stock_name"""
         for num in range(0, 6):
             print(f"Now working on {Stock.stock_name[num]}")
             stock = Stock(name=Stock.stock_name[num])
             Stock.stocks.append(stock)
             print(Stock.stocks[num].name)
 
-    #Called from roll(), handles adding to stock value
     def increase_value(stock, amount):
+        """Called from Dice.roll(), handles increasing value of selected stock"""
 
-        #Called from increase_value(), handles doubling player held stock quantities
         def double_stock(stock):
+            """Called from Stock.increase_value(), handles doubling player held stock quantity"""
             Stock.stocks[stock].value = 100
             # Check all players to see who is holding shares of stock
             # if player has any shares, double amount
@@ -120,15 +120,14 @@ class Stock:
         if Stock.stocks[stock_index].value > 195:
             double_stock(stock)
 
-    #Called from roll(), handles subtracting from stock value
     def decrease_value(stock, amount):
+        """Called from Dice.roll(), handles subtracting from stock value"""
 
-        #Called from decrease_value(), handles removing all of selected stock from player inventory
         def split_stock(stock):
+            """Called from Stock.decrease_value(), handles removing all of selected stock from player inventory"""
             Stock.stocks[stock].value = 100
             # Check all players to see who is holding shares of stock
             # if player has any shares, set to 0
-
             print(Stock.stocks[stock].value)
 
         stock_index = Stock.stock_name.index(stock)
@@ -138,6 +137,7 @@ class Stock:
             split_stock(stock)
 
     def dividend(stock, amount):
+        """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
         #all players with selected stock get quantity multiplied by amount
         print("Now in dividend()")
 
@@ -147,8 +147,8 @@ class Dice:
     action = ["Up", "Down", "Dividend"]
     amount = [5, 10, 20]
 
-    #Rolls 3 dice (stock_name, action, amount) and prints the results to the screen.
     def roll():
+        """Rolls 3 dice (Stock.stock_name, Dice.action, Dice.amount) and prints the results to the screen."""
         stock = random.choice(Stock.stock_name)
         action = random.choice(Dice.action)
         amount = random.choice(Dice.amount)
@@ -167,31 +167,53 @@ class Menu:
     stocks = Stock.stock_name #Answer for stock name
     action = ["Buy", "Sell", "Done", ""]
     amount = [range(1-1000)]
+    menu = [range(1, 3)]
 
-    #Displays opening message with basic game rules
-    def welcome_message():
-        pass
+    def main_menu():
+        """Displays start screen with options including: New Game, About, Exit"""
+        print("""
+            Stock Ticker
+            ------------
 
-    #Displays current players stats
+            1. New Game
+            2. About
+            3. Exit
+
+            """)
+        choice = Menu.ask_question("Please selection an option: 1, 2 or 3.\n", Menu.menu)
+        if choice == "1":
+            pass
+        elif choice == "2":
+            Menu.about_page()
+        else:
+            #Exit script
+            pass
+
+    def about_page():
+        print("About page")
+        back = Menu.ask_question("Press enter to go back.")
+        Menu.main_menu()
+
+    def set_rounds():
+        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
+        return rounds
+
     def player_info(player):
+        """Displays current players stats"""
         print(f"{Player.players[player].name}'s Stats:")
         print(f"Money{str(Player.players[player].money).rjust(10, '-')}")
         for key in Player.players[player].stocks:
             value = Player.players[player].stocks[key]
             print(f"{str(key).ljust(10, '-')}-{value}")
 
-    #Displays current stock prices
     def stock_info():
+        """Displays current stock prices"""
         print("Stock Prices:")
         for i, v in enumerate(Stock.stock_name):
             print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{Stock.stocks[i].value}")
 
-    def set_rounds():
-        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
-        return rounds
-
-    #test = ask_question("What question?", ["y","n"])
     def ask_question(question, answers=None):
+        """test = ask_question("What question?", ["y","n"])"""
         asking = True
         while asking:
             response = input(f"{question}")
@@ -200,16 +222,18 @@ class Menu:
             else:
                 asking = False if response not in answers else True
         return response
+        
+Menu.main_menu()
 
-Stock.create_stocks()
-Player.name_player(0,2)
-Menu.stock_info()
-Menu.player_info(1)
-print(Stock.stocks[1].name, Stock.stocks[1].value)
-Player.buy_stock(1)
-print(Player.players[1].stocks)
-Player.sell_stock(1)
-print(Player.players[1].stocks)
+# Stock.create_stocks()
+# Player.name_player(0,2)
+# Menu.stock_info()
+# Menu.player_info(1)
+# print(Stock.stocks[1].name, Stock.stocks[1].value)
+# Player.buy_stock(1)
+# print(Player.players[1].stocks)
+# Player.sell_stock(1)
+# print(Player.players[1].stocks)
 
 #CHANGE: list comprehension for any empty lists using standard for loops
 #ADD: double_stock()
