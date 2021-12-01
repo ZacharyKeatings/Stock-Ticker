@@ -23,8 +23,8 @@ class Player:
 
     def create_bots():
         """Creates user selected number of bots (1 - 8)"""
-        num_bots = Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", range(1, 8))
-        return int(num_bots)
+        num_bots = int(Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", Menu.num_player))
+        return num_bots
 
     def create_humans():
         """Creates user chosen number of human players (2 to 8)"""
@@ -35,40 +35,41 @@ class Player:
         """Creates names for all bot + human players"""
         total_players = num_bots + num_humans
         for num in range(1, total_players+1):
-            player = Player(name=Menu.ask_question(f"What is Player {num}'s name?\n"))
+            player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
         return total_players
 
+    def current_prices(player):
+        current_prices = []
+        for num in range(0, 6):
+            stock_price = Stock.stocks[num].value
+            current_prices.append(stock_price)
+        if Player.players[player].money < min(current_prices):
+            print("You can't afford any stocks")
+            return False
+        else:
+            return True
+
     def buy_stock(player):
         """User chooses which stock to buy and the quantity"""
-
-        def current_prices():
-            current_prices = []
-            for num in range(0, 6):
-                stock_price = Stock.stocks[num].value
-                current_prices.append(stock_price)
-            if Player.players[player].money < min(current_prices):
-                print("You can't afford any stocks")
-                return False
-            else:
-                return True
     
-        def max_purchase():
-            max_purchase = math.trunc(Player.players[player].money/stock_price)
-            print(f"You can buy {max_purchase} share(s) of {buy_name}.")
+        def max_purchase(stock_index, stock_name):
+            """Defines the highest quantity of selected stock user can purchase with current funds"""
+            max_purchase = math.trunc(Player.players[player].money/Stock.stocks[stock_index].stock_price)
+            print(f"You can buy {max_purchase} share(s) of {stock_name}.")
             return max_purchase
 
-        price_check = current_prices()
+        price_check = Player.current_prices(player)
         while price_check:        
-            buy_name = Menu.ask_question("Which stock would you like to buy?\n", Stock.stock_name).capitalize()
-            #.lower() buy_name?
+            buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
             #Create while loop as long as max_purchase >= 1
-            max_purchase = max_purchase()
+            #Create function to take stock name and return index number.
+            max_purchase = max_purchase(***stock_index***, buy_name)
             if max_purchase >= 1:
                 buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
                 buy_number = int(buy_number)
-                Player.players[player].money -= buy_number * stock_price
+                Player.players[player].money -= buy_number * Stock.stocks.index(buy_name) 
                 Player.players[player].stocks[buy_name] += buy_number
             else:
                 break
@@ -118,8 +119,8 @@ class Stock:
 
     def create_stocks():
         """append Stock.stock with stock names from Stock.stock_name"""
-        for num in range(0, 6):
-            stock = Stock(name=Stock.stock_name[num])
+        for i, v in enumerate(Stock.stock_name):
+            stock = Stock(name=v)
             Stock.stocks.append(stock)
 
     def increase_value(stock, amount):
@@ -152,6 +153,7 @@ class Stock:
         if Stock.stocks[stock_index].value < 5:
             split_stock(stock)
 
+    #This should go in Player
     def dividend(stock, amount):
         """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
         #all players with selected stock get quantity multiplied by Dice.roll().amount
@@ -183,7 +185,9 @@ class Menu:
     stocks = Stock.stock_name #Answer for stock name
     action = ["Buy", "Sell", "Done", ""]
     amount = [range(1-1000)]
+    num_player = range(1, 8)
     menu = [range(1, 3)]
+    name = "name"
 
     def main_menu():
         """Displays start screen with options including: New Game, About, Exit"""
@@ -208,10 +212,15 @@ class Menu:
     def init_game():
         """Begins a new game where users can choose number of player, rounds, and player names."""
         Stock.create_stocks()
-        Player.num_bots += Player.create_bots()
-        print(f"{Player.num_bots} bots")
+        print(Stock.stocks[0].name)
+        print(Stock.stocks[0].value)
+        print(Stock.stocks[1].name)
+        print(Stock.stocks[2].name)
+        # Player.num_bots += Player.create_bots()
+        # print(f"{Player.num_bots} bots")
         Player.num_humans += Player.create_humans()
         print(f"{Player.num_humans} humans")
+        stock_index = 0
         num_players = Player.name_player(Player.num_bots, Player.num_humans)
         print(num_players)
         #Let players buy there initial stocks before rolling
@@ -219,7 +228,6 @@ class Menu:
             Menu.player_info(i)
             Menu.stock_info()
             Player.buy_stock(i)
-
 
     def about_page():
         print("About page")
@@ -244,15 +252,17 @@ class Menu:
         for i, v in enumerate(Stock.stock_name):
             print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{Stock.stocks[i].value}")
 
-    def ask_question(question, answers=None):
+    def ask_question(question, answers):
         """test = ask_question("What question?", ["y","n"])"""
         asking = True
         while asking:
             response = input(f"{question}")
-            if answers is None:
+            if answers == Menu.name:
                 return response
+            elif response not in answers:
+                asking = False
             else:
-                asking = False if response not in answers else True
+                asking = False
         return response
         
 Menu.main_menu()
