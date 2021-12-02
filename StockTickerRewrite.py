@@ -54,25 +54,22 @@ class Player:
     def buy_stock(player):
         """User chooses which stock to buy and the quantity"""
     
-        def max_purchase(stock_index, stock_name):
+        def max_purchase(stock_name):
             """Defines the highest quantity of selected stock user can purchase with current funds"""
-            max_purchase = math.trunc(Player.players[player].money/Stock.stocks[stock_index].stock_price)
+            index = Stock.stock_index(buy_name)
+            max_purchase = math.trunc(Player.players[player].money/Stock.stocks[index].stock_price)
             print(f"You can buy {max_purchase} share(s) of {stock_name}.")
             return max_purchase
 
         price_check = Player.current_prices(player)
         while price_check:        
             buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
-            #Create while loop as long as max_purchase >= 1
-            #Create function to take stock name and return index number.
-            max_purchase = max_purchase(***stock_index***, buy_name)
-            if max_purchase >= 1:
+            while int(max_purchase) >= 1:
+                max_purchase = max_purchase(buy_name)
                 buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
                 buy_number = int(buy_number)
                 Player.players[player].money -= buy_number * Stock.stocks.index(buy_name) 
                 Player.players[player].stocks[buy_name] += buy_number
-            else:
-                break
 
     def sell_stock(player):
         """User choose which stock to sell and the quantity"""
@@ -122,6 +119,13 @@ class Stock:
         for i, v in enumerate(Stock.stock_name):
             stock = Stock(name=v)
             Stock.stocks.append(stock)
+
+    def stock_index(stock_name):
+        """Takes stock name and returns the associated stock index"""
+        if stock_name in Stock.stock_name:
+            return Stock.stock_name.index(stock_name)
+        else:
+            return "Unknown stock"
 
     def increase_value(stock, amount):
         """Called from Dice.roll(), handles increasing value of selected stock"""
@@ -210,7 +214,7 @@ class Menu:
             pass
 
     def init_game():
-        """Begins a new game where users can choose number of player, rounds, and player names."""
+        """Begins a new game where users can choose number of players, rounds, and player names."""
         Stock.create_stocks()
         print(Stock.stocks[0].name)
         print(Stock.stocks[0].value)
