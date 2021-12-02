@@ -5,8 +5,6 @@ class Player:
     "Player stats"
 
     players = []
-    num_bots = 0
-    num_humans = 0
 
     def __init__(self, name = "", money = 5000):
         """stocks refer to quantity of given stock. money is available money. name is chosen by user"""
@@ -41,6 +39,7 @@ class Player:
         return total_players
 
     def current_prices(player):
+        """Checks if player can afford any stocks."""
         current_prices = []
         for num in range(0, 6):
             stock_price = Stock.stocks[num].value
@@ -88,6 +87,18 @@ class Player:
             sell_amount = int(sell_amount)
             Player.players[player].money += sell_amount * Stock.stocks[sell_index].value
             Player.players[player].stocks[sell_name] -= sell_amount
+
+    def dividend(stock, div_roll):
+        """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
+        #all players with selected stock get quantity multiplied by Dice.roll().amount
+        print("Now in dividend()")
+        dividend = (div_roll / 10) + 1
+        #Check that rolled stock value is >=100:
+        if Stock.stocks[stock].value >= 100:
+            for num in enumerate(Menu.num_players):
+                Player.players[num].stocks[stock] *= dividend
+        else:
+            return None
 
 class Bot(Player):
     "All actions for bots"
@@ -157,12 +168,6 @@ class Stock:
         if Stock.stocks[stock_index].value < 5:
             split_stock(stock)
 
-    #This should go in Player
-    def dividend(stock, amount):
-        """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
-        #all players with selected stock get quantity multiplied by Dice.roll().amount
-        print("Now in dividend()")
-
 class Dice:
     "Dice properties"
 
@@ -182,7 +187,7 @@ class Dice:
         elif action == Dice.action [1]:
             Stock.decrease_value(stock, amount)
         else:
-            Stock.dividend(stock, amount)
+            Player.dividend(stock, amount)
 
 class Menu:
     "All menu screens"
@@ -204,7 +209,7 @@ class Menu:
             3. Exit
 
             """)
-        choice = Menu.ask_question("Please selection an option: 1, 2 or 3.\n", Menu.menu)
+        choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
         if choice == "1":
             Menu.init_game()
         elif choice == "2":
@@ -216,29 +221,56 @@ class Menu:
     def init_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
         Stock.create_stocks()
-        print(Stock.stocks[0].name)
-        print(Stock.stocks[0].value)
-        print(Stock.stocks[1].name)
-        print(Stock.stocks[2].name)
-        # Player.num_bots += Player.create_bots()
-        # print(f"{Player.num_bots} bots")
-        Player.num_humans += Player.create_humans()
-        print(f"{Player.num_humans} humans")
-        stock_index = 0
-        num_players = Player.name_player(Player.num_bots, Player.num_humans)
-        print(num_players)
-        #Let players buy there initial stocks before rolling
+        #Ask which option they wish: 1. bot simulation, 2. bots and humans, 3.humans only
+        choice = Menu.player_type()
+        if choice == "1":
+            num_bots = Player.create_bots()
+        elif choice == "2":
+            num_bots = Player.create_bots()
+            num_humans = Player.create_humans()
+        else:
+            num_humans = Player.create_humans()
+        num_players = Player.name_player(num_bots, num_humans)
+        #Let players buy there initial stocks before rolling, 
+        #but only move to next player when all money is gone 
+        #or user chooses to end turn
         for i in range(0, num_players):
             Menu.player_info(i)
             Menu.stock_info()
             Player.buy_stock(i)
+        #Choose number of rounds to play
+
+    def main_game():
+        """main gameplay loop"""
+        pass
+
+    def end_game():
+        """Runs end of game final score, with winner and loser."""
+        pass
 
     def about_page():
+        """Displays About page, option 2 from main_menu()"""
         print("About page")
         back = Menu.ask_question("Press enter to go back.")
         Menu.main_menu()
 
+    def player_type():
+        """Choose between bots only, bots and humans, or just humans."""
+        #1. bot simulation, 2. bots and humans, 3.humans only
+        print("""
+            Pick Game Mode
+            --------------
+
+            1. Bot Simulation
+            2. Bots & Humans
+            3. Humans Only
+
+            """)
+        choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
+        return choice
+
     def set_rounds():
+        """User chooses number of rounds to be played"""
         rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
         return int(rounds)
 
@@ -275,4 +307,3 @@ Menu.main_menu()
 #ADD: Stock.double_stock()
 #ADD: Stock.split_stock()
 #FIX: Menu.init_game()
-#ADD: Stock.dividend()
