@@ -28,16 +28,14 @@ class Player:
     def create_humans():
         """Creates user chosen number of human players (2 to 8)"""
         num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
-        return int(num_humans)
+        return num_humans
 
-    def name_player(num_bots, num_humans):
+    def name_player(num_players):
         """Creates names for all bot + human players"""
-        total_players = num_bots + num_humans
-        for num in range(1, total_players+1):
+        for num in range(1, num_players+1):
             player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
-        return total_players
 
     def current_prices(player):
         """Checks if player can afford any stocks."""
@@ -210,28 +208,32 @@ class Menu:
             """)
         choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
         if choice == "1":
-            Menu.init_game()
+            Menu.setup_game()
         elif choice == "2":
             Menu.about_page()
         else:
             #Exit script
             pass
 
-    def init_game():
+    def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
+        #Populate Stock.stocks list with stock data
         Stock.create_stocks()
-        choice = Menu.player_type()
-        if choice == "1":
-            num_bots = Player.create_bots()
-        elif choice == "2":
-            num_bots = Player.create_bots()
-            num_humans = Player.create_humans()
-        else:
-            num_humans = Player.create_humans()
-        num_players = Player.name_player(num_bots, num_humans)
+        print("Created stocks!")
+
+        #Choose between bots, bots/humans, humans
+        Menu.player_type()
+        print("Chose player type!")
+        #Name players and count total players
+        num_players = len(Player.players)
+        print("Counted players!")
+        Player.name_player(num_players)
+        print("Named players!")
+
         #Let players buy there initial stocks before rolling, 
         #but only move to next player when all money is gone 
         #or user chooses to end turn
+
         for i in range(0, num_players):
             Menu.player_info(i)
             Menu.stock_info()
@@ -249,7 +251,7 @@ class Menu:
     def about_page():
         """Displays About page, option 2 from main_menu()"""
         print("About page")
-        back = Menu.ask_question("Press enter to go back.")
+        Menu.ask_question("Press enter to go back.")
         Menu.main_menu()
 
     def player_type():
@@ -264,7 +266,13 @@ class Menu:
 
             """)
         choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
-        return choice
+        if choice == "1":
+            Player.create_bots()
+        elif choice == "2":
+            Player.create_bots()
+            Player.create_humans()
+        else:
+            Player.create_humans()
 
     def set_rounds():
         """User chooses number of rounds to be played"""
@@ -300,16 +308,17 @@ class Menu:
         
 #####TEST SECTION#####
 
-num_humans = Player.create_humans()
-num_players = Player.name_player(0, num_humans)
-make_stocks = Stock.create_stocks()
-for num in range(0,10):
-    Dice.roll()
-    Menu.player_info(1)
-    Menu.stock_info()
+# num_humans = Player.create_humans()
+# num_players = Player.name_player(0, num_humans)
+# make_stocks = Stock.create_stocks()
+# for num in range(0,10):
+#     Dice.roll()
+#     Menu.player_info(1)
+#     Menu.stock_info()
 
-#Menu.main_menu()
+Menu.main_menu()
 
+# FIX: Menu.setup_game() doesn't ask for player names
 # CHANGE: List comprehension for any empty lists using standard for loops?
 # ADD: Simple bot AI: 3 difficulties - low, moderate, and high risk.
 #     Various risks buy and sell at different rates and values
