@@ -27,3 +27,5 @@ This is an ongoing project which will be updated as I learn more about Python.
 #### Inspiration:
 
 This is based on the now out of print board game, Stock Ticker, published by Copp Clark Publishing Company.
+
+![Visitor Count](https://profile-counter.glitch.me/ZacharyKeatings/count.svg)
