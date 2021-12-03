@@ -10,6 +10,7 @@ class Player:
         """stocks refer to quantity of given stock. money is available money. name is chosen by user"""
         self.name = name
         self.money = money
+        #Change stocks names here and in Stock class
         self.stocks = {
             "Gold": 0,
             "Silver": 0,
@@ -90,13 +91,11 @@ class Player:
 
     def dividend(stock, div_roll):
         """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
-        #all players with selected stock get quantity multiplied by Dice.roll().amount
-        print("Now in dividend()")
-        dividend = (div_roll / 10) + 1
-        #Check that rolled stock value is >=100:
-        if Stock.stocks[stock].value >= 100:
-            for num in enumerate(Menu.num_players):
-                Player.players[num].stocks[stock] *= dividend
+        stock_index = Stock.stock_index(stock)
+        dividend = (div_roll / 100) + 1
+        if Stock.stocks[stock_index].value >= 100:
+            for i, v in enumerate(Player.players):
+                Player.players[i].money = Player.players[i].money * dividend
         else:
             return None
 
@@ -115,8 +114,9 @@ class Bot(Player):
 class Stock:
     "Stock value"
 
-    #Change stock names here:
+    #Change stock names here and Player class
     stock_name = ["Gold", "Silver", "Oil", "Bonds", "Grain", "Industrial"]
+
     #All stock values during gameplay goes here after create_stocks() runs
     stocks = []
 
@@ -160,11 +160,9 @@ class Stock:
             """Called from Stock.decrease_value(), handles removing all of selected stock from player inventory"""
             Stock.stocks[stock].value = 100
             # Check all players to see who is holding shares of stock_name (for i in range(0, total_players): player.player[i].stocks[*stock_index*] = 0)
-            print(Stock.stocks[stock].value)
 
         stock_index = Stock.stock_name.index(stock)
-        Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - amount
-        print(Stock.stocks[stock_index].value)
+        Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - int(amount)
         if Stock.stocks[stock_index].value < 5:
             split_stock(stock)
 
@@ -181,7 +179,6 @@ class Dice:
         amount = random.choice(Dice.amount)
         print(stock, action, amount)
 
-        #Make appropriate changes to stock based on roll
         if action == Dice.action[0]:
             Stock.increase_value(stock, amount)
         elif action == Dice.action [1]:
@@ -191,7 +188,9 @@ class Dice:
 
 class Menu:
     "All menu screens"
-    stocks = Stock.stock_name #Answer for stock name
+
+    #These are all various answers to ask_question()
+    stocks = Stock.stock_name
     action = ["Buy", "Sell", "Done", ""]
     amount = [range(1-1000)]
     num_player = range(1, 8)
@@ -221,7 +220,6 @@ class Menu:
     def init_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
         Stock.create_stocks()
-        #Ask which option they wish: 1. bot simulation, 2. bots and humans, 3.humans only
         choice = Menu.player_type()
         if choice == "1":
             num_bots = Player.create_bots()
@@ -256,7 +254,6 @@ class Menu:
 
     def player_type():
         """Choose between bots only, bots and humans, or just humans."""
-        #1. bot simulation, 2. bots and humans, 3.humans only
         print("""
             Pick Game Mode
             --------------
@@ -301,9 +298,29 @@ class Menu:
                 asking = False
         return response
         
-Menu.main_menu()
+#####TEST SECTION#####
 
-#CHANGE: list comprehension for any empty lists using standard for loops
-#ADD: Stock.double_stock()
-#ADD: Stock.split_stock()
-#FIX: Menu.init_game()
+num_humans = Player.create_humans()
+num_players = Player.name_player(0, num_humans)
+make_stocks = Stock.create_stocks()
+for num in range(0,10):
+    Dice.roll()
+    Menu.player_info(1)
+    Menu.stock_info()
+
+#Menu.main_menu()
+
+# CHANGE: List comprehension for any empty lists using standard for loops?
+# ADD: Simple bot AI: 3 difficulties - low, moderate, and high risk.
+#     Various risks buy and sell at different rates and values
+#     Ex: - High risk buys near 180 or 20
+#         - Moderate risk buys near 180, but sells near 20
+#         - Low risk buys low, but not below 25, sells near 20
+# ADD: Menu.main_game()
+# ADD: Menu.end_game()
+# ADD: Menu.about_page()
+# ADD: Stock.split_stock()
+# ADD: Stock.double_stock()
+# CONSIDER: keep bots in player class, or create separate class?
+# ADD: Bot.buy_stock()
+# ADD: Bot.sell_stock()
