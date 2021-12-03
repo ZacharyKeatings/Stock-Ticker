@@ -144,9 +144,8 @@ class Stock:
         def double_stock(stock):
             """Called from Stock.increase_value(), handles doubling player held stock quantity"""
             Stock.stocks[stock].value = 100
-            # Check all players to see who is holding shares of stock
-            # if player has any shares, double amount
-            print(Stock.stocks[stock].value)
+            for i, v in enumerate(Player.players):
+                Player.players[i].stocks[stock] = Player.players[i].stocks[stock] * 2
 
         stock_index = Stock.stock_name.index(stock)       
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value + amount
@@ -159,7 +158,8 @@ class Stock:
         def split_stock(stock):
             """Called from Stock.decrease_value(), handles removing all of selected stock from player inventory"""
             Stock.stocks[stock].value = 100
-            # Check all players to see who is holding shares of stock_name (for i in range(0, total_players): player.player[i].stocks[*stock_index*] = 0)
+            for i, v in enumerate(Player.players):
+                Player.players[i].stocks[stock] = 0
 
         stock_index = Stock.stock_name.index(stock)
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - int(amount)
