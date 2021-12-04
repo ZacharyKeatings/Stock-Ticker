@@ -28,7 +28,6 @@ class Player:
     def create_humans():
         """Creates user chosen number of human players (2 to 8)"""
         num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
-        print("Finished making humans.")############remove
         return num_humans
 
     def name_player(num_players):
@@ -37,7 +36,6 @@ class Player:
             player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
-        print("Finished naming players")############remove
 
     def current_prices(player):
         """Checks if player can afford any stocks."""
@@ -63,12 +61,10 @@ class Player:
 
         #creates list of stock values player can afford. if list empty, price_check returns False
         price_check = Player.current_prices(player)
-        print(price_check)
         if price_check:        
             buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
             most_purchase = max_purchase(buy_name)
             if int(most_purchase) >= 1:
-                print(most_purchase)############remove
                 buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,most_purchase))
                 buy_number = int(buy_number)
                 total_cost = buy_number * Stock.stocks[Stock.stock_index(buy_name)].value
@@ -207,7 +203,10 @@ class Menu:
     num_player = range(1, 8)
     menu = [range(1, 3)]
     name = "name"
+
+    #Initiating main variables
     rounds = 0
+    num_players = 0
 
     def main_menu():
         """Displays start screen with options including: New Game, About, Exit"""
@@ -232,7 +231,11 @@ class Menu:
     def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
         #Display
-        print("############remove")
+        print("""
+            Setup New Game
+            --------------
+
+            """)
         
         #Populate Stock.stocks list with stock data
         Stock.create_stocks()
@@ -262,19 +265,33 @@ class Menu:
     def main_game():
         """main gameplay loop"""
         #run main block however many rounds user chose
+        current_round = 1
+        print("You are in Menu.main_game()")
+        while current_round <= int(Menu.rounds):
+            #Display current round out of total rounds
+
             #loop through players constantly
-            #Dice roll
-            #stat screen
+            for i in range(0, Menu.num_players):
+                #Dice roll
+                Dice.roll()
+                #stat screen
+                Menu.stat_screen(i)
             #buy, sell or pass
+            current_round += 1
         #End of final round, run end_game
-        pass
+        Menu.end_game()
+        
 
     def end_game():
         """Runs end of game final score, with winner and loser."""
-        #calculate all players current values of stock
-        #add to money on hand
+        #Loops through each player
+        for i in range(0, Menu.num_players):
+            #Loops through each stock in i player
+            for s in enumerate(Stock.Stock_name):
+                Player.players[i].money += Player.players[i].stock[s] * Stock.stocks[s].value
+
         #rank most money to least money
-        pass
+        print("You are in Menu.end_game()")
 
     def about_page():
         """Displays About page, option 2 from main_menu()"""
@@ -282,11 +299,14 @@ class Menu:
             About Stock Ticker
             ------------------
 
-            Insert Stock Ticker
-            description here.
+            The object of the game is 
+            to buy and sell stocks, and 
+            by so doing accumulate a 
+            greater amount of money 
+            than the other players.
 
             """)
-        Menu.ask_question("Press enter to go back.")
+        Menu.ask_question("Press enter to go back.", Menu.action[3])
         Menu.main_menu()
 
     def player_type():
@@ -317,7 +337,6 @@ class Menu:
         """User chooses number of rounds to be played"""
         rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
         Menu.rounds = rounds
-        print(Menu.rounds)############remove
 
     def stat_screen(current_player):
         Menu.player_info(current_player)
@@ -350,31 +369,16 @@ class Menu:
             else:
                 asking = False
         return response
-        
-#####TEST SECTION#####
-
-# num_humans = Player.create_humans()
-# num_players = Player.name_player(0, num_humans)
-# make_stocks = Stock.create_stocks()
-# for num in range(0,10):
-#     Dice.roll()
-#     Menu.player_info(1)
-#     Menu.stock_info()
 
 Menu.main_menu()
 
-# FIX: Menu.setup_game() doesn't ask for player names
 # CHANGE: List comprehension for any empty lists using standard for loops?
 # ADD: Simple bot AI: 3 difficulties - low, moderate, and high risk.
 #     Various risks buy and sell at different rates and values
 #     Ex: - High risk buys near 180 or 20
 #         - Moderate risk buys near 180, but sells near 20
 #         - Low risk buys low, but not below 25, sells near 20
-# ADD: Menu.main_game()
-# ADD: Menu.end_game()
-# ADD: Menu.about_page()
-# ADD: Stock.split_stock()
-# ADD: Stock.double_stock()
+# ADD: Proper looping in Menu.setup_game() so at end of method, it runs Menu.main_game()
 # CONSIDER: keep bots in player class, or create separate class?
 # ADD: Bot.buy_stock()
 # ADD: Bot.sell_stock()
