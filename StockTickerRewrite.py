@@ -28,6 +28,7 @@ class Player:
     def create_humans():
         """Creates user chosen number of human players (2 to 8)"""
         num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
+        print("Finished making humans.")############remove
         return num_humans
 
     def name_player(num_players):
@@ -36,6 +37,7 @@ class Player:
             player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
+        print("Finished naming players")############remove
 
     def current_prices(player):
         """Checks if player can afford any stocks."""
@@ -54,20 +56,31 @@ class Player:
     
         def max_purchase(stock_name):
             """Defines the highest quantity of selected stock user can purchase with current funds"""
-            index = Stock.stock_index(buy_name)
-            max_purchase = math.trunc(Player.players[player].money/Stock.stocks[index].stock_price)
+            index = Stock.stock_index(stock_name)
+            max_purchase = math.trunc(Player.players[player].money/Stock.stocks[index].value)
             print(f"You can buy {max_purchase} share(s) of {stock_name}.")
             return max_purchase
 
+        #creates list of stock values player can afford. if list empty, price_check returns False
         price_check = Player.current_prices(player)
-        while price_check:        
+        print(price_check)
+        if price_check:        
             buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
-            while int(max_purchase) >= 1:
-                max_purchase = max_purchase(buy_name)
-                buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,max_purchase))
+            most_purchase = max_purchase(buy_name)
+            if int(most_purchase) >= 1:
+                print(most_purchase)############remove
+                buy_number = Menu.ask_question("How many shares do you wish to purchase?", range(0,most_purchase))
                 buy_number = int(buy_number)
-                Player.players[player].money -= buy_number * Stock.stocks.index(buy_name) 
+                total_cost = buy_number * Stock.stocks[Stock.stock_index(buy_name)].value
+                Player.players[player].money -= total_cost
                 Player.players[player].stocks[buy_name] += buy_number
+                Menu.stat_screen(player)
+            else:
+                return None
+        else:
+            return None
+
+            
 
     def sell_stock(player):
         """User choose which stock to sell and the quantity"""
@@ -194,6 +207,7 @@ class Menu:
     num_player = range(1, 8)
     menu = [range(1, 3)]
     name = "name"
+    rounds = 0
 
     def main_menu():
         """Displays start screen with options including: New Game, About, Exit"""
@@ -217,40 +231,61 @@ class Menu:
 
     def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
+        #Display
+        print("############remove")
+        
         #Populate Stock.stocks list with stock data
         Stock.create_stocks()
-        print("Created stocks!")
 
-        #Choose between bots, bots/humans, humans
-        Menu.player_type()
-        print("Chose player type!")
-        #Name players and count total players
-        num_players = len(Player.players)
-        print("Counted players!")
+        #Choose between bots, bots/humans, humans, count total players
+        num_players = Menu.player_type()
+
+        #Name all players
         Player.name_player(num_players)
-        print("Named players!")
+
+        #set number of rounds to be played in current game
+        Menu.set_rounds()
 
         #Let players buy there initial stocks before rolling, 
         #but only move to next player when all money is gone 
         #or user chooses to end turn
+        v = 0
+        while v < num_players:
+            for i in range(0, num_players):
+                Menu.stat_screen(i)
+                v += 1
+        print("Everyone has bought their stocks!")############remove
+        #Run the main game now:
+        Menu.main_game()
 
-        for i in range(0, num_players):
-            Menu.player_info(i)
-            Menu.stock_info()
-            Player.buy_stock(i)
-        #Choose number of rounds to play
 
     def main_game():
         """main gameplay loop"""
+        #run main block however many rounds user chose
+            #loop through players constantly
+            #Dice roll
+            #stat screen
+            #buy, sell or pass
+        #End of final round, run end_game
         pass
 
     def end_game():
         """Runs end of game final score, with winner and loser."""
+        #calculate all players current values of stock
+        #add to money on hand
+        #rank most money to least money
         pass
 
     def about_page():
         """Displays About page, option 2 from main_menu()"""
-        print("About page")
+        print("""
+            About Stock Ticker
+            ------------------
+
+            Insert Stock Ticker
+            description here.
+
+            """)
         Menu.ask_question("Press enter to go back.")
         Menu.main_menu()
 
@@ -267,31 +302,41 @@ class Menu:
             """)
         choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
         if choice == "1":
-            Player.create_bots()
+            num_players = Player.create_bots()
+            return int(num_players)
         elif choice == "2":
-            Player.create_bots()
-            Player.create_humans()
+            num_bots = Player.create_bots()
+            num_humans = Player.create_humans()
+            num_players = int(num_bots) + int(num_humans)
+            return num_players
         else:
-            Player.create_humans()
+            num_humans = Player.create_humans()
+            return int(num_humans)
 
     def set_rounds():
         """User chooses number of rounds to be played"""
         rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
-        return int(rounds)
+        Menu.rounds = rounds
+        print(Menu.rounds)############remove
+
+    def stat_screen(current_player):
+        Menu.player_info(current_player)
+        Menu.stock_info()
+        Player.buy_stock(current_player)
 
     def player_info(player):
         """Displays current players stats"""
         print(f"{Player.players[player].name}'s Stats:")
-        print(f"Money{str(Player.players[player].money).rjust(10, '-')}")
+        print("Money-".ljust(11, '-') + str(Player.players[player].money))
         for key in Player.players[player].stocks:
             value = Player.players[player].stocks[key]
-            print(f"{str(key).ljust(10, '-')}-{value}")
+            print(f"{str(key).ljust(11, '-')}{value}")
 
     def stock_info():
         """Displays current stock prices"""
         print("Stock Prices:")
         for i, v in enumerate(Stock.stock_name):
-            print(f"{str(Stock.stocks[i].name).ljust(10,'-')}-{Stock.stocks[i].value}")
+            print(f"{str(Stock.stocks[i].name).ljust(11,'-')}{Stock.stocks[i].value}")
 
     def ask_question(question, answers):
         """test = ask_question("What question?", ["y","n"])"""
