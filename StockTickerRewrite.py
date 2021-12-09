@@ -37,13 +37,14 @@ class Player:
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
 
-    def current_prices(player):
+    def can_buy(current_player):
         """Checks if player can afford any stocks."""
         current_prices = []
         for num in range(0, 6):
             stock_price = Stock.stocks[num].value
             current_prices.append(stock_price)
-        if Player.players[player].money < min(current_prices):
+        if Player.players[current_player].money < min(current_prices):
+            print()
             return False
         else:
             return True
@@ -56,16 +57,13 @@ class Player:
 
     def buy_stock(current_player):
         """User chooses which stock to buy and the quantity"""
-        if Player.current_prices(current_player) is False:
-            print("You can't afford any stocks")
-        else:        
-            buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
-            print(f"You can buy {Player.max_purchase(buy_name, current_player)} share(s) of {buy_name}.")
-            while int(Player.max_purchase(buy_name, current_player)) >= 1:
-                buy_number = int(Menu.ask_question("How many shares do you wish to purchase?", range(0,Player.max_purchase(buy_name, current_player))))
-                Player.players[current_player].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
-                Player.players[current_player].stocks[buy_name] += buy_number
-                Menu.stat_screen(current_player)            
+        buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
+        print(f"You can buy {Player.max_purchase(buy_name, current_player)} share(s) of {buy_name}.")
+        #!while int(Player.max_purchase(buy_name, current_player)) >= 1:
+        buy_number = int(Menu.ask_question("How many shares do you wish to buy?\n", range(0,Player.max_purchase(buy_name, current_player))))
+        Player.players[current_player].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
+        Player.players[current_player].stocks[buy_name] += buy_number
+        #!Menu.stat_screen(current_player)        
 
     def can_sell(current_player):
         """Checks if the current player has any stocks to sell."""
@@ -78,20 +76,17 @@ class Player:
         if can_sell is False:
             return False
         else:
-            return True
+            return can_sell
 
     def sell_stock(current_player):
         """User choose which stock to sell and the quantity"""
-        if can_sell is False:
-            print("You don't have any stocks to sell!")
-        else:
-            sell_name = Menu.ask_question("Which stock would you like to sell?", can_sell).capitalize()
-            sell_index = Stock.stock_name.index(sell_name)
-            max_sell = Player.players[current_player].stocks[sell_name]
-            sell_amount = Menu.ask_question(f"How many shares of {sell_name} do you want to sell?", range(0, max_sell))
-            sell_amount = int(sell_amount)
-            Player.players[current_player].money += sell_amount * Stock.stocks[sell_index].value
-            Player.players[current_player].stocks[sell_name] -= sell_amount
+        sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sell(current_player)).capitalize()
+        sell_index = Stock.stock_name.index(sell_name)
+        max_sell = Player.players[current_player].stocks[sell_name]
+        sell_amount = Menu.ask_question(f"How many shares of {sell_name} do you want to sell?\n", range(0, max_sell))
+        sell_amount = int(sell_amount)
+        Player.players[current_player].money += sell_amount * Stock.stocks[sell_index].value
+        Player.players[current_player].stocks[sell_name] -= sell_amount
 
     def dividend(stock, div_roll):
         """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
@@ -253,55 +248,49 @@ class Menu:
         #or user chooses to end turn
         current_player = 0
         while current_player < Menu.num_players:
-            for i in range(0, Menu.num_players):
-                Menu.stat_screen(i)
-                current_player += 1
+            Menu.stat_screen(current_player)
+            Player.buy_stock(current_player)
+            current_player += 1
         #Run the main game now:
         Menu.main_game()
 
     def main_game():
         """main gameplay loop"""
-        #run main block however many rounds user chose
         current_round = 1
         while current_round <= int(Menu.rounds):
-            #loop through players constantly
             for current_player in range(0, Menu.num_players):
-                #Display current round out of total rounds
-                print(f"{current_round}/{Menu.rounds}")
-                #Dice roll
-                Dice.roll()
-                #stat screen
-                Menu.stat_screen(current_player)
-                #buy, sell or pass
-                Menu.player_turn(current_player)
-
-            #After all players get a turn in the round, increase round count
+                Menu.player_turn(current_player, current_round)
             current_round += 1
-
-        #End of final round, run end_game
         Menu.end_game()
         
-    def player_turn(current_player):
+    def player_turn(current_player, current_round):
         """Handles full range of turn actions for player."""
         playing = True
+        Dice.roll()
         while playing:
-            if Player.current_prices(current_player) is False and Player.can_sell(current_player) is False:
-                choice = Menu.ask_question("Please press enter to continue.", Menu.action[3]).capitalize()
+            can_buy = Player.can_buy(current_player)
+            can_sell = Player.can_sell(current_player)
+            if can_buy is False and can_sell is False:
+                Menu.stat_screen(current_player, current_round)
+                choice = Menu.ask_question("Please press enter to continue.\n", Menu.action[3])
                 playing = False
-            elif Player.current_prices(current_player) is False:
-                choice = Menu.ask_question("Would you like to Sell or Pass?", Menu.action).capitalize()
+            elif can_buy is False:
+                Menu.stat_screen(current_player, current_round)
+                choice = Menu.ask_question("Would you like to Sell or Pass?\n", Menu.action).capitalize()
                 if choice == "Sell":
                     Player.sell_stock(current_player)
                 else:
                     playing = False
-            elif Player.can_sell(current_player) is False:
-                choice = Menu.ask_question("Would you like to Buy or Pass?", Menu.action).capitalize()
+            elif can_sell is False:
+                Menu.stat_screen(current_player, current_round)
+                choice = Menu.ask_question("Would you like to Buy or Pass?\n", Menu.action).capitalize()
                 if choice == "Buy":
                     Player.buy_stock(current_player)
                 else:
                     playing = False
             else:
-                choice = Menu.ask_question("Would you like to Buy, Sell, or Pass?", Menu.action).capitalize()
+                Menu.stat_screen(current_player)
+                choice = Menu.ask_question("Would you like to Buy, Sell, or Pass?\n", Menu.action).capitalize()
                 if choice == "Buy":
                     Player.buy_stock(current_player)
                 elif choice == "Sell":
@@ -367,13 +356,23 @@ class Menu:
 
     def set_rounds():
         """User chooses number of rounds to be played"""
-        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000 \n", Menu.amount)
+        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000\n", Menu.amount)
         Menu.rounds = rounds
 
-    def stat_screen(current_player):
-        Menu.player_info(current_player)
-        Menu.stock_info()
-        Player.buy_stock(current_player)
+    def stat_screen(current_player, current_round = False, dice_outcome = False):
+        """Displays all viable information like play, stock, current round and dice roll."""
+        if current_round == False and dice_outcome == False:
+            Menu.player_info(current_player)
+            Menu.stock_info()
+        elif dice_outcome == False:
+            print(f"{current_round}/{Menu.rounds}")
+            Menu.player_info(current_player)
+            Menu.stock_info()
+        else:
+            print(f"{current_round}/{Menu.rounds}")
+            print(dice_outcome)
+            Menu.player_info(current_player)
+            Menu.stock_info()
 
     def player_info(player):
         """Displays current players stats"""
@@ -388,16 +387,6 @@ class Menu:
         print("Stock Prices:")
         for i, v in enumerate(Stock.stock_name):
             print(f"{str(Stock.stocks[i].name).ljust(11,'-')}{Stock.stocks[i].value}")
-
-    def game_choices(current_player):
-        """Gives user option to buy, sell or pass"""
-        choice = Menu.ask_question("Would you like to buy, sell, or pass?", Menu.choice)
-        if choice == Menu.choice[0]:
-            Player.buy_stock(current_player)
-        elif choice == Menu.choice[1]:
-            Player.sell_stock(current_player)
-        else:
-            pass
 
     def ask_question(question, answers):
         """test = ask_question("What question?", ["y","n"])"""
@@ -423,5 +412,4 @@ Menu.main_menu()
 #! CONSIDER: keep bots in player class, or create separate class?
 #! ADD: Bot.buy_stock()
 #! ADD: Bot.sell_stock()
-#! ADD: buy sell or pass option during main game, even if player has no money.
 
