@@ -22,17 +22,20 @@ class Player:
 
     def create_bots():
         """Creates user selected number of bots (1 - 8)"""
+        #! Clear screen here
         num_bots = int(Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", Menu.num_player))
         return num_bots
 
     def create_humans():
         """Creates user chosen number of human players (2 to 8)"""
-        num_humans = Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", range(2, 8))
+        #! Clear screen here
+        num_humans = int(Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", Menu.num_player))
         return num_humans
 
     def name_player(num_players):
         """Creates names for all bot + human players"""
         for num in range(1, num_players+1):
+            #! Clear screen here
             player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
@@ -59,11 +62,9 @@ class Player:
         """User chooses which stock to buy and the quantity"""
         buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks).capitalize()
         print(f"You can buy {Player.max_purchase(buy_name, current_player)} share(s) of {buy_name}.")
-        #!while int(Player.max_purchase(buy_name, current_player)) >= 1:
         buy_number = int(Menu.ask_question("How many shares do you wish to buy?\n", range(0,Player.max_purchase(buy_name, current_player))))
         Player.players[current_player].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
         Player.players[current_player].stocks[buy_name] += buy_number
-        #!Menu.stat_screen(current_player)        
 
     def can_sell(current_player):
         """Checks if the current player has any stocks to sell."""
@@ -83,8 +84,7 @@ class Player:
         sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sell(current_player)).capitalize()
         sell_index = Stock.stock_name.index(sell_name)
         max_sell = Player.players[current_player].stocks[sell_name]
-        sell_amount = Menu.ask_question(f"How many shares of {sell_name} do you want to sell?\n", range(0, max_sell))
-        sell_amount = int(sell_amount)
+        sell_amount = int(Menu.ask_question(f"How many shares of {sell_name} do you want to sell?\n", range(0, max_sell)))
         Player.players[current_player].money += sell_amount * Stock.stocks[sell_index].value
         Player.players[current_player].stocks[sell_name] -= sell_amount
 
@@ -194,9 +194,9 @@ class Menu:
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
     action = ["Buy", "Sell", "Pass", ""]
-    amount = [range(1-1000)]
+    amount = range(1-1000)
     num_player = range(1, 8)
-    menu = [range(1, 3)]
+    menu = ["1", "2", "3"]
     name = "name"
 
     #Initiating main variables
@@ -214,21 +214,21 @@ class Menu:
             3. Exit
 
             """)
-        choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
-        if choice == "1":
+        choice = int(Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu))
+        if choice == 1:
             Menu.setup_game()
-        elif choice == "2":
+        elif choice == 2:
             Menu.about_page()
         else:
             exit()
 
     def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
+        #! Clear screen here
         #Display
         print("""
             Setup New Game
             --------------
-
             """)
         
         #Populate Stock.stocks list with stock data
@@ -332,16 +332,15 @@ class Menu:
 
     def player_type():
         """Choose between bots only, bots and humans, or just humans."""
+            #! Clear screen here
         print("""
-            Pick Game Mode
-            --------------
-
+            Pick Game Mode:
             1. Bot Simulation
             2. Bots & Humans
             3. Humans Only
 
             """)
-        choice = Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu)
+        choice = int(Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu))
         if choice == "1":
             num_players = Player.create_bots()
             return int(num_players)
@@ -356,7 +355,7 @@ class Menu:
 
     def set_rounds():
         """User chooses number of rounds to be played"""
-        rounds = Menu.ask_question("How many rounds would you like to play? 1 - 1000\n", Menu.amount)
+        rounds = int(Menu.ask_question("How many rounds would you like to play? 1 - 1000\n", Menu.amount))
         Menu.rounds = rounds
 
     def stat_screen(current_player, current_round = False, dice_outcome = False):
@@ -393,13 +392,13 @@ class Menu:
         asking = True
         while asking:
             response = input(f"{question}")
-            if answers == Menu.name:
+            if response in answers:
+                asking = False
                 return response
-            elif response not in answers:
-                asking = False
+            elif answers == Menu.name:
+                return response
             else:
-                asking = False
-        return response
+                print("That's not a proper choice!")
 
 Menu.main_menu()
 
@@ -412,4 +411,4 @@ Menu.main_menu()
 #! CONSIDER: keep bots in player class, or create separate class?
 #! ADD: Bot.buy_stock()
 #! ADD: Bot.sell_stock()
-
+#! FIX: Menu choices, data type, input
