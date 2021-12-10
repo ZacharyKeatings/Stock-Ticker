@@ -1,5 +1,6 @@
 import random
 import math
+import os
 
 class Player:
     "Player stats"
@@ -20,22 +21,66 @@ class Player:
             "Industrial": 0
             }
 
-    def create_bots():
+    def create_bots(player_type):
         """Creates user selected number of bots (1 - 8)"""
-        #! Clear screen here
-        num_bots = int(Menu.ask_question("How many bots would you like to play? Choose between 1 - 8.\n", Menu.num_player))
-        return num_bots
+        #! Add check if user chose option 1, 2 or 3 in Menu.setup_game().
+        Menu.clear_console()
+        if player_type == 1:
+            num_bots = int(Menu.ask_question("""
+            Choose Number Of Bots
+            ---------------------
 
-    def create_humans():
+            Please choose the number 
+            of bots you would like 
+            to include in this 
+            simulation between 2 - 8.
+
+            """, Menu.num_player))
+            return num_bots
+        elif player_type == 2:
+            num_bots = int(Menu.ask_question("""
+            Choose Number Of Bots
+            ---------------------
+
+            Please choose the number 
+            of bots you would like to 
+            include in this simulation 
+            between 1 - 7.
+
+            """, Menu.num_player)) #! make 1 - 7 range in Menu
+            return num_bots
+
+    def create_humans(player_type):
         """Creates user chosen number of human players (2 to 8)"""
-        #! Clear screen here
-        num_humans = int(Menu.ask_question("How many people are playing? Choose between 2 - 8.\n", Menu.num_player))
-        return num_humans
+        #! A check if user chose option 1, 2, or 3 in Menu.setup_game().
+        Menu.clear_console()
+        if player_type == 2:
+            num_humans = int(Menu.ask_question("""
+            Choose Number Of people
+            -----------------------
+
+            Please choose the number 
+            of people you would like 
+            to include between 2 - 8. #! (8 - num_bots)
+
+            """, Menu.num_player))
+            return num_humans
+        if player_type == 3:
+            num_humans = int(Menu.ask_question("""
+            Choose Number Of People
+            -----------------------
+
+            Please choose the number 
+            of people you would like 
+            to include between 2 - 8.
+
+            """, Menu.num_player))
+            return num_humans
 
     def name_player(num_players):
         """Creates names for all bot + human players"""
         for num in range(1, num_players+1):
-            #! Clear screen here
+            Menu.clear_console()
             player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
             print(f"Player {num} is now named: {player.name}")
             Player.players.append(player)
@@ -203,6 +248,12 @@ class Menu:
     rounds = 0
     num_players = 0
 
+    def clear_console():
+        command = 'clear'
+        if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+            command = 'cls'
+        os.system(command)
+
     def main_menu():
         """Displays start screen with options including: New Game, About, Exit"""
         print("""
@@ -216,15 +267,16 @@ class Menu:
             """)
         choice = int(Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu))
         if choice == 1:
+            Menu.clear_console()
             Menu.setup_game()
         elif choice == 2:
+            Menu.clear_console()
             Menu.about_page()
         else:
             exit()
 
     def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
-        #! Clear screen here
         #Display
         print("""
             Setup New Game
@@ -261,6 +313,7 @@ class Menu:
             for current_player in range(0, Menu.num_players):
                 Menu.player_turn(current_player, current_round)
             current_round += 1
+            Menu.clear_console()
         Menu.end_game()
         
     def player_turn(current_player, current_round):
@@ -328,6 +381,7 @@ class Menu:
 
             """)
         Menu.ask_question("Press enter to go back.", Menu.action[3])
+        Menu.clear_console()
         Menu.main_menu()
 
     def player_type():
@@ -408,7 +462,6 @@ Menu.main_menu()
 #!      Ex: - High risk buys near 180 or 20
 #!          - Moderate risk buys near 180, but sells near 20
 #!          - Low risk buys low, but not below 25, sells near 20
-#! CONSIDER: keep bots in player class, or create separate class?
 #! ADD: Bot.buy_stock()
 #! ADD: Bot.sell_stock()
 #! FIX: Menu choices, data type, input
