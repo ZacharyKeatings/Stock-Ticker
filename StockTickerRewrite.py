@@ -1,3 +1,4 @@
+import operator
 import random
 import math
 import os
@@ -343,7 +344,7 @@ class Menu:
                     Menu.clear_console()
                     playing = False
             else:
-                Menu.stat_screen(current_player)
+                Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Would you like to Buy, Sell, or Pass?\n", Menu.action)
                 if choice.capitalize() == "Buy":
                     Player.buy_stock(current_player)
@@ -353,22 +354,26 @@ class Menu:
                     Menu.clear_console()
                     playing = False
                 
-
     def end_game():
         """Runs end of game final score, with winner and loser."""
-        #Loops through each player
+        #Loops through each player, adds stock value to money, displays total money
+        ranking = {}
         for i, c in enumerate(Player.players):
-            #Loops through each stock in i player
             for k, n in enumerate(Stock.stock_name):
                 Player.players[i].money += Player.players[i].stocks[n] * Stock.stocks[k].value
+            money = Player.players[i].money
+            name = Player.players[i].name
+            player_value = {name : money}
+            print(f"{player_value=}")#!-----------------------------
+            ranking.update(player_value)
+            print(f"{Player.players[i].name} has ${Player.players[i].money}.") #! now that players are ranked, remove this line  
+            print(f"{ranking=}")#!----------------------------
+        sorted_ranking = dict(sorted(ranking.items(), key=operator.itemgetter(1), reverse=True))
+        print(f"{sorted_ranking=}")#!---------------------
 
-        #Print out all players final score
-        for i, c in enumerate(Player.players):
-            print(f"{Player.players[i].name} has ${Player.players[i].money}.")
-
-        # rank most money to least money
+        for i, c in enumerate(sorted_ranking):
+            print(f"Player {c} has ${sorted_ranking[c]}")
         
-
     def about_page():
         """Displays About page, option 2 from main_menu()"""
         print("""
