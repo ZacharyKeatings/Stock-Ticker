@@ -55,7 +55,7 @@ class Player:
         Menu.clear_console()
         if player_type == 2:
             num_humans = int(Menu.ask_question(f"""
-            Choose Number Of people
+            Choose Number Of People
             -----------------------
 
             Please choose the number 
@@ -160,23 +160,65 @@ class Bot(Player):
         super().__init__(self)
         self.difficulty = difficulty
 
-    def bot_difficulty(current_bot):
+    def set_difficulty(current_bot):
         """This sets the difficulty level for a selected bot in the game."""
-        choice = Menu.ask_question(f"What difficulty level would you like {current_bot} to be? {min(Menu.menu)} - {max(Menu.menu)}\n", Menu.menu)
+        Menu.clear_console()
+        print("""
+            Choose Bot Difficulty
+            ---------------------
+
+            1. Low risk:   -Buys: Any stock under 100, but above 30
+                           -Sells: When held stocks hit 25 or below
+            2. Medium risk -Buys: Prioritizes stocks valued at 180 or above
+                           -Sells: When held stocks hit 25 or below
+            3. High risk   -Buys: Prioritizes stocks valued near 180 and 20
+                           -Sells: Holds all stocks
+
+            """)
+        choice = Menu.ask_question(f"Which difficulty level will {Player.players[current_bot].name} be set to?\n", Menu.menu)
         if choice == 1:
-            #!Low risk buys low, but not below 25, sells near 20
             Player.players[current_bot].difficulty = 1
         elif choice == 2:
-            #!Moderate risk buys near 180, but sells near 20
             Player.players[current_bot].difficulty = 2
         else:
-            #!High risk buys near 180 or 20
             Player.players[current_bot].difficulty = 3
 
-    def buy_stock():
-        pass
+    #!Bot turn starts
+    #!Check bot difficulty
+    #!move into appropriate risk method
+    #!within risk method, check if bot can_buy/can_sell
+    #!If bot can_buy, run buy loop within risk method
+    #!If bot can_sell, run sell loop ithin risk method
+
+    def low_risk(current_bot):
+        """Difficulty level: 1. Handles buying and selling"""
+
+        def buy_stock():
+            """Low risk level buy stock method"""
+            pass
     
-    def sell_stock():
+        def sell_stock():
+            pass
+        pass
+
+    def medium_risk(current_bot):
+
+        def buy_stock():
+            """Medium risk level buy stock method"""
+            pass
+    
+        def sell_stock():
+            pass
+        pass
+
+    def high_risk(current_bot):
+
+        def buy_stock():
+            """High risk level buy stock method"""
+            pass
+    
+        def sell_stock():
+            pass
         pass
 
 class Stock:
