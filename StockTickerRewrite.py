@@ -75,14 +75,22 @@ class Player:
             """, Menu.num_human))
             return num_humans
 
-    def name_player(num_players):
-        """Creates names for all bot + human players"""
+    def name_bots(num_bots):
         Menu.clear_console()
-        for num in range(1, num_players+1):
-            player = Player(Menu.ask_question(f"What is Player {num}'s name?\n", Menu.name))
-            print(f"Player {num} is now named: {player.name}")
+        for bots in range(1, Menu.num_bots+1):
+            name = Menu.ask_question(f"What is Bot #{bots}'s name?\n", Menu.name) + " The Bot"
+            player = Bot()
+            print(f"Bot #{bots} is now named: {name}.")
             Player.players.append(player)
-        
+            Player.players[bots-1].name = name
+
+    def name_humans(num_humans):
+        Menu.clear_console()
+        for human in range(1, Menu.num_humans+1):
+            player = Player(Menu.ask_question(f"What is Player {human}'s name?\n", Menu.name))
+            print(f"Player {human} is now named: {player.name}")
+            Player.players.append(player)
+
     def can_buy(current_player):
         """Checks if player can afford any stocks."""
         current_prices = []
@@ -123,7 +131,6 @@ class Player:
 
     def sell_stock(current_player):
         """User choose which stock to sell and the quantity"""
-        #! After saying Sell, it skips to next players turn
         sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sell(current_player))
         sell_index = Stock.stock_name.index(sell_name.capitalize())
         max_sell = Player.players[current_player].stocks[sell_name.capitalize()]
@@ -149,8 +156,22 @@ class Player:
 class Bot(Player):
     "All actions for bots"
 
-    def __init__(self):
-        pass
+    def __init__(self, difficulty = 0):
+        super().__init__(self)
+        self.difficulty = difficulty
+
+    def bot_difficulty(current_bot):
+        """This sets the difficulty level for a selected bot in the game."""
+        choice = Menu.ask_question(f"What difficulty level would you like {current_bot} to be? {min(Menu.menu)} - {max(Menu.menu)}\n", Menu.menu)
+        if choice == 1:
+            #!Low risk buys low, but not below 25, sells near 20
+            Player.players[current_bot].difficulty = 1
+        elif choice == 2:
+            #!Moderate risk buys near 180, but sells near 20
+            Player.players[current_bot].difficulty = 2
+        else:
+            #!High risk buys near 180 or 20
+            Player.players[current_bot].difficulty = 3
 
     def buy_stock():
         pass
@@ -236,7 +257,8 @@ class Menu:
     #Initiating main variables
     rounds = 0
     num_bots = 0
-    num_players = 0
+    num_humans = 0
+    num_players = num_bots + num_humans
 
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
@@ -285,8 +307,20 @@ class Menu:
         #Choose between bots, bots/humans, humans, count total players
         Menu.player_type()
 
-        #Name all players
-        Player.name_player(Menu.num_players)
+        #!Name all players
+        #!Player.name_player(Menu.num_players)
+
+        #Name all players, including bots
+        #Only bots
+        if Menu.num_bots > 0 and Menu.num_humans == 0:
+            Player.name_bots(Menu.num_bots)
+        #Bots and humans
+        elif Menu.num_bots > 0 and Menu.num_humans > 0:
+            Player.name_bots(Menu.num_bots)
+            Player.name_humans(Menu.num_players)
+        #Only humans
+        else:
+            Player.name_humans(Menu.num_players)
 
         #set number of rounds to be played in current game
         Menu.set_rounds()
@@ -364,15 +398,12 @@ class Menu:
             money = Player.players[i].money
             name = Player.players[i].name
             player_value = {name : money}
-            print(f"{player_value=}")#!-----------------------------
             ranking.update(player_value)
-            print(f"{Player.players[i].name} has ${Player.players[i].money}.") #! now that players are ranked, remove this line  
-            print(f"{ranking=}")#!----------------------------
         sorted_ranking = dict(sorted(ranking.items(), key=operator.itemgetter(1), reverse=True))
-        print(f"{sorted_ranking=}")#!---------------------
 
         for i, c in enumerate(sorted_ranking):
-            print(f"Player {c} has ${sorted_ranking[c]}")
+            print("Here is the final score for each player in descending order.")
+            print(f"{i+1}. Player {c} has ${sorted_ranking[c]}")
         
     def about_page():
         """Displays About page, option 2 from main_menu()"""
@@ -406,13 +437,11 @@ class Menu:
         choice = int(Menu.ask_question(f"Please select an option: {min(Menu.menu)} - {max(Menu.menu)}\n", Menu.menu))
         if choice == 1:
             Menu.num_bots = Player.create_bots(1)
-            Menu.num_players = int(Menu.num_bots)
         elif choice == 2:
             Menu.num_bots = Player.create_bots(2)
-            num_humans = Player.create_humans(2)
-            Menu.num_players = int(num_humans) + int(Menu.num_bots)
+            Menu.num_humans = Player.create_humans(2)
         else:
-            Menu.num_players = Player.create_humans(3)
+            Menu.num_humans = Player.create_humans(3)
 
     def set_rounds():
         """User chooses number of rounds to be played"""
@@ -466,11 +495,6 @@ class Menu:
 
 Menu.main_menu()
 
-#! ADD: Simple bot AI: 3 difficulties - low, moderate, and high risk.
-#!      Various risks buy and sell at different rates and values
-#!      Ex: - High risk buys near 180 or 20
-#!          - Moderate risk buys near 180, but sells near 20
-#!          - Low risk buys low, but not below 25, sells near 20
 #! ADD: Bot.buy_stock()
 #! ADD: Bot.sell_stock()
 #! ADD: Incorporate bots into game in general.
