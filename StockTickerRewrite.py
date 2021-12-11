@@ -37,16 +37,16 @@ class Player:
             """, Menu.num_player))
             return num_bots
         elif player_type == 2:
-            num_bots = int(Menu.ask_question("""
+            num_bots = int(Menu.ask_question(f"""
             Choose Number Of Bots
             ---------------------
 
             Please choose the number 
             of bots you would like to 
             include in this simulation 
-            between 1 - 7.
+            between {min(Menu.num_bot)} - {max(Menu.num_bot)}.
 
-            """, Menu.num_player)) #! make 1 - 7 range in Menu
+            """, Menu.num_bot))
             return num_bots
 
     def create_humans(player_type):
@@ -64,15 +64,14 @@ class Player:
             """, Menu.numhumans_response))
             return num_humans
         elif player_type == 3:
-            num_humans = int(Menu.ask_question("""
+            num_humans = int(Menu.ask_question(f"""
             Choose Number Of People
             -----------------------
 
             Please choose the number 
             of people you would like 
-            to include between 2 - 8.
-
-            """, Menu.num_player))
+            to include between {min(Menu.num_human)} - {max(Menu.num_human)}
+            """, Menu.num_human))
             return num_humans
 
     def name_player(num_players):
@@ -116,9 +115,9 @@ class Player:
         for key in Player.players[current_player].stocks:
             value = Player.players[current_player].stocks[key]
             if value > 0:
-                can_sell.append(value)
+                can_sell.append(key)
         
-        if can_sell is False:
+        if can_sell == []:
             return False
         else:
             return can_sell
@@ -224,7 +223,6 @@ class Dice:
         action = random.choice(Dice.action)
         amount = random.choice(Dice.amount)
         print(stock, action, amount)
-
         if action == Dice.action[0]:
             Stock.increase_value(stock, amount)
         elif action == Dice.action [1]:
@@ -243,9 +241,11 @@ class Menu:
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
     action = ["Buy", "Sell", "Pass", ""]
-    amount = range(1, 1001)
-    num_player = range(1, 9)
-    menu = range(1,4)
+    amount = [i for i in range(1, 1001)]
+    num_player = [i for i in range(1, 9)]
+    num_bot = [i for i in range(1, 9)]
+    num_human = [i for i in range(2, 9)]
+    menu = [i for i in range(1, 4)]
     name = "name"
     numhumans_response = (8 - num_bots)
 
@@ -278,11 +278,6 @@ class Menu:
 
     def setup_game():
         """Begins a new game where users can choose number of players, rounds, and player names."""
-        #Display
-        print("""
-            Setup New Game
-            --------------
-            """)
         
         #Populate Stock.stocks list with stock data
         Stock.create_stocks()
@@ -301,8 +296,10 @@ class Menu:
         #or user chooses to end turn
         #! Make sure player cannot afford any more stocks before moving onto next player.
         for i in range(Menu.num_players):
+            Menu.clear_console()
             Menu.stat_screen(i)
             Player.buy_stock(i)
+
         
         # current_player = 0
         # while current_player < Menu.num_players:
@@ -311,6 +308,7 @@ class Menu:
         #     current_player += 1
 
         #Run the main game now:
+        Menu.clear_console()
         Menu.main_game()
 
     def main_game():
@@ -328,27 +326,29 @@ class Menu:
         playing = True
         Dice.roll()
         while playing:
-            can_buy = Player.can_buy(current_player)
-            can_sell = Player.can_sell(current_player)
-            if can_buy is False and can_sell is False:
+            if Player.can_buy(current_player) is False and Player.can_sell(current_player) is False:
                 Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Please press enter to continue.\n", Menu.action[3])
                 playing = False
-            elif can_buy is False:
+            elif Player.can_buy(current_player) is False:
                 Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Would you like to Sell or Pass?\n", Menu.action).capitalize()
                 if choice == "Sell":
                     Player.sell_stock(current_player)
                 else:
+                    Menu.clear_console()
                     playing = False
-            elif can_sell is False:
+            elif Player.can_sell(current_player) is False:
                 Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Would you like to Buy or Pass?\n", Menu.action).capitalize()
                 if choice == "Buy":
                     Player.buy_stock(current_player)
                 else:
+                    Menu.clear_console()
                     playing = False
-            else:
+            else: #! After player sells all stocks, it keeps coming back here.
+                print(Player.can_buy(current_player))
+                print(Player.can_sell(current_player))
                 Menu.stat_screen(current_player)
                 choice = Menu.ask_question("Would you like to Buy, Sell, or Pass?\n", Menu.action).capitalize()
                 if choice == "Buy":
@@ -356,6 +356,7 @@ class Menu:
                 elif choice == "Sell":
                     Player.sell_stock(current_player)
                 else:
+                    Menu.clear_console()
                     playing = False
                 
 
@@ -393,15 +394,17 @@ class Menu:
 
     def player_type():
         """Choose between bots only, bots and humans, or just humans."""
-            #! Clear screen here
         print("""
+            Setup New Game
+            --------------
+
             Pick Game Mode:
             1. Bot Simulation
             2. Bots & Humans
             3. Humans Only
 
             """)
-        choice = int(Menu.ask_question("Please select an option: 1, 2 or 3.\n", Menu.menu))
+        choice = int(Menu.ask_question(f"Please select an option: {min(Menu.menu)} - {max(Menu.menu)}\n", Menu.menu))
         if choice == 1:
             Menu.num_bots = Player.create_bots(1)
             Menu.num_players = int(Menu.num_bots)
@@ -414,7 +417,7 @@ class Menu:
 
     def set_rounds():
         """User chooses number of rounds to be played"""
-        rounds = int(Menu.ask_question("How many rounds would you like to play? 1 - 1000\n", Menu.amount))
+        rounds = int(Menu.ask_question(f"How many rounds would you like to play? {min(Menu.amount)} - {max(Menu.amount)}\n", Menu.amount))
         Menu.rounds = rounds
 
     def stat_screen(current_player, current_round = False, dice_outcome = False):
@@ -471,4 +474,9 @@ Menu.main_menu()
 #!          - Low risk buys low, but not below 25, sells near 20
 #! ADD: Bot.buy_stock()
 #! ADD: Bot.sell_stock()
-#! FIX: Menu choices, data type, input
+#! ADD: Incorporate bots into game in general.
+#!      -if num_bots > 0:
+#!      -*while/for loop incrementing current player to match num_bots
+#!      -   run bot command
+#!      -else:
+#!      -   run human commands
