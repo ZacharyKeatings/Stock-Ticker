@@ -126,9 +126,9 @@ class Player:
         sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sell(current_player))
         sell_index = Stock.stock_name.index(sell_name.capitalize())
         max_sell = Player.players[current_player].stocks[sell_name.capitalize()]
-        sell_amount = int(Menu.ask_question(f"How many shares of {sell_name} do you want to sell?\n", range(0, max_sell)))
+        sell_amount = int(Menu.ask_question(f"How many shares of {sell_name.capitalize()} do you want to sell?\n", range(0, max_sell)))
         Player.players[current_player].money += sell_amount * Stock.stocks[sell_index].value
-        Player.players[current_player].stocks[sell_name] -= sell_amount
+        Player.players[current_player].stocks[sell_name.capitalize()] -= sell_amount
 
     def dividend(stock, div_roll):
         """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
@@ -140,7 +140,7 @@ class Player:
                 bonus = Player.players[i].stocks[stock] * dividend
                 Player.players[i].money = Player.players[i].money + int(bonus)
                 Player.players[i].money = int(Player.players[i].money)
-                print(f"{Player.players[i].name} received {int(bonus)}.")
+                print(f"{Player.players[i].name} received ${int(bonus)}.")
         else:
             print(f"{stock} is under 100 and will not payout.")
             return None
@@ -329,7 +329,7 @@ class Menu:
             elif Player.can_buy(current_player) is False:
                 Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Would you like to Sell or Pass?\n", Menu.action)
-                if choice == "Sell":
+                if choice.capitalize() == "Sell":
                     Player.sell_stock(current_player)
                 else:
                     Menu.clear_console()
@@ -337,7 +337,7 @@ class Menu:
             elif Player.can_sell(current_player) is False:
                 Menu.stat_screen(current_player, current_round)
                 choice = Menu.ask_question("Would you like to Buy or Pass?\n", Menu.action)
-                if choice == "Buy":
+                if choice.capitalize() == "Buy":
                     Player.buy_stock(current_player)
                 else:
                     Menu.clear_console()
@@ -345,9 +345,9 @@ class Menu:
             else:
                 Menu.stat_screen(current_player)
                 choice = Menu.ask_question("Would you like to Buy, Sell, or Pass?\n", Menu.action)
-                if choice == "Buy":
+                if choice.capitalize() == "Buy":
                     Player.buy_stock(current_player)
-                elif choice == "Sell":
+                elif choice.capitalize() == "Sell":
                     Player.sell_stock(current_player)
                 else:
                     Menu.clear_console()
