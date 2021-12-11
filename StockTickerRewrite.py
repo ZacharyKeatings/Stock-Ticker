@@ -188,36 +188,52 @@ class Bot(Player):
     #!move into appropriate risk method
     #!within risk method, check if bot can_buy/can_sell
     #!If bot can_buy, run buy loop within risk method
-    #!If bot can_sell, run sell loop ithin risk method
+    #!If bot can_sell, run sell loop within risk method
 
     def low_risk(current_bot):
-        """Difficulty level: 1. Handles buying and selling"""
+        """Difficulty level: 1."""
+        #!create 2 lists: buy_list with stock name with value between 100 and 30. 
+        #!                sell_list with stock name with value 25 and below.
+        #!first action will be selling using sell list
+        #!then buying with buy list
 
         def buy_stock():
             """Low risk level buy stock method"""
             pass
     
         def sell_stock():
+            """Low risk level sell stock method"""
             pass
         pass
 
     def medium_risk(current_bot):
+        """Difficulty level: 2."""
+        #!create 2 lists: buy_list with stock name with value at 180 or above. 
+        #!                sell_list with stock name with value 25 and below.
+        #!first action will be selling using sell list
+        #!then buying with buy list
 
         def buy_stock():
             """Medium risk level buy stock method"""
             pass
     
         def sell_stock():
+            """Medium risk level sell stock method"""
             pass
         pass
 
     def high_risk(current_bot):
+        """Difficulty level: 3."""
+        #!create 2 lists: buy_high with stock name with value 180 or higher. 
+        #!                buy_low with stock name with value 20 or under.
+        #!then bot buys stocks from buy_high first, 
 
         def buy_stock():
             """High risk level buy stock method"""
             pass
     
         def sell_stock():
+            """High risk level sell stock method"""
             pass
         pass
 
