@@ -132,6 +132,7 @@ class Player:
     def sell_stock(current_player):
         """User choose which stock to sell and the quantity"""
         sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sell(current_player))
+        #!replace stock_index object with stock_index function
         sell_index = Stock.stock_name.index(sell_name.capitalize())
         max_sell = Player.players[current_player].stocks[sell_name.capitalize()]
         sell_amount = int(Menu.ask_question(f"How many shares of {sell_name.capitalize()} do you want to sell?\n", range(0, max_sell)))
@@ -140,6 +141,7 @@ class Player:
 
     def dividend(stock, div_roll):
         """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
+        #!replace stock_index object with stock_index function
         stock_index = Stock.stock_index(stock)
         dividend = (div_roll / 100) + 1
         if Stock.stocks[stock_index].value >= 100:
@@ -192,30 +194,77 @@ class Bot(Player):
 
     def low_risk(current_bot):
         """Difficulty level: 1."""
-        #!create 2 lists: buy_list with stock name with value between 100 and 30. 
-        #!                sell_list with stock name with value 25 and below.
         #!first action will be selling using sell list
         #!then buying with buy list
 
-        def buy_stock():
-            """Low risk level buy stock method"""
-            pass
+        buy_list = []
+        sell_list = []
+
+        for k, v in enumerate(Stock.stocks):
+            if Stock.stocks[k].value > 95:
+                buy_list.append(Stock.stocks[k].name)
+            if Stock.stocks[k].value < 30:
+                sell_list.append(Stock.stocks[k].name)
+
+            if buy_list == []:
+                break
+            else:
+                Bot.bot_buy(current_bot)
+
+        def bot_buy(current_bot):
+            """Bot buy stock method"""
+            
+            print("Which stock would you like to buy?\n")
+            buy_name = random.choice(buy_list)
+            print(buy_name)
+            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
+            print("How many shares do you wish to buy?\n")
+            buy_number = Player.max_purchase(buy_name, current_bot)
+            print(buy_number)
+            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
+            Player.players[current_bot].stocks[buy_name] += buy_number
+
     
-        def sell_stock():
+        def bot_sell(current_bot):
             """Low risk level sell stock method"""
-            pass
+            print("Which stock would you like to sell?\n")
+            sell_name = random.choice(sell_list)
+            print(sell_name)
+            #!replace stock_index object with stock_index function
+            sell_index = Stock.stock_name.index(sell_name)
+            max_sell = Player.players[current_bot].stocks[sell_name]
+            print(f"How many shares of {sell_name} do you want to sell?\n")
+            print(max_sell)
+            Player.players[current_bot].money += max_sell * Stock.stocks[sell_index].value
+            Player.players[current_bot].stocks[sell_name] -= max_sell
+
         pass
 
     def medium_risk(current_bot):
         """Difficulty level: 2."""
-        #!create 2 lists: buy_list with stock name with value at 180 or above. 
-        #!                sell_list with stock name with value 25 and below.
         #!first action will be selling using sell list
         #!then buying with buy list
 
+        buy_list = []
+        sell_list = []
+
+        for k, v in enumerate(Stock.stocks):
+            if Stock.stocks[k].value > 175:
+                buy_list.append(Stock.stocks[k].name)
+            if Stock.stocks[k].value < 30:
+                sell_list.append(Stock.stocks[k].name)
+
         def buy_stock():
             """Medium risk level buy stock method"""
-            pass
+            print("Which stock would you like to buy?\n")
+            buy_name = random.choice(buy_list)
+            print(buy_name)
+            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
+            print("How many shares do you wish to buy?\n")
+            buy_number = Player.max_purchase(buy_name, current_bot)
+            print(buy_number)
+            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
+            Player.players[current_bot].stocks[buy_name] += buy_number
     
         def sell_stock():
             """Medium risk level sell stock method"""
@@ -228,13 +277,26 @@ class Bot(Player):
         #!                buy_low with stock name with value 20 or under.
         #!then bot buys stocks from buy_high first, 
 
+        buy_list = []
+
+        for k, v in enumerate(Stock.stocks):
+            if Stock.stocks[k].value > 175:
+                buy_list.append(Stock.stocks[k].name)
+            if Stock.stocks[k].value < 25:
+                buy_list.append(Stock.stocks[k].name)
+
         def buy_stock():
             """High risk level buy stock method"""
-            pass
-    
-        def sell_stock():
-            """High risk level sell stock method"""
-            pass
+            print("Which stock would you like to buy?\n")
+            buy_name = random.choice(buy_list)
+            print(buy_name)
+            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
+            print("How many shares do you wish to buy?\n")
+            buy_number = Player.max_purchase(buy_name, current_bot)
+            print(buy_number)
+            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
+            Player.players[current_bot].stocks[buy_name] += buy_number
+
         pass
 
 class Stock:
@@ -266,6 +328,7 @@ class Stock:
 
     def increase_value(stock, amount):
         """Called from Dice.roll(), handles increasing value of selected stock"""
+        #!replace stock_index object with stock_index function
         stock_index = Stock.stock_name.index(stock)       
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value + amount
         if Stock.stocks[stock_index].value > 195:
@@ -279,6 +342,7 @@ class Stock:
 
     def decrease_value(stock, amount):
         """Called from Dice.roll(), handles subtracting from stock value"""
+        #!replace stock_index object with stock_index function
         stock_index = Stock.stock_name.index(stock)
         Stock.stocks[stock_index].value = Stock.stocks[stock_index].value - int(amount)
         if Stock.stocks[stock_index].value < 5:
@@ -553,8 +617,6 @@ class Menu:
 
 Menu.main_menu()
 
-#! ADD: Bot.buy_stock()
-#! ADD: Bot.sell_stock()
 #! ADD: Incorporate bots into game in general.
 #!      -if num_bots > 0:
 #!      -*while/for loop incrementing current player to match num_bots
