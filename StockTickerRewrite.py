@@ -1,5 +1,6 @@
 import operator
 import random
+import time
 import math
 import os
 
@@ -158,6 +159,9 @@ class Player:
 class Bot(Player):
     "All actions for bots"
 
+    buy_list = []
+    sell_list = []
+
     def __init__(self, difficulty = 0):
         super().__init__(self)
         self.difficulty = difficulty
@@ -185,119 +189,132 @@ class Bot(Player):
         else:
             Player.players[current_bot].difficulty = 3
 
-    #!Bot turn starts
-    #!Check bot difficulty
-    #!move into appropriate risk method
-    #!within risk method, check if bot can_buy/can_sell
-    #!If bot can_buy, run buy loop within risk method
-    #!If bot can_sell, run sell loop within risk method
+    def bot_start(current_bot):
+        """Runs in Menu.setup_game only"""
+        for i in Stock.stock_name:
+            Bot.buy_list.append(i)
+        Bot.bot_buy(current_bot)
+
+    def bot_turn(current_bot, current_round):
+        """Handles full range of turn actions for human players."""
+        playing = True
+        Dice.roll()
+        while playing:
+            if Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is False:
+                Menu.stat_screen(current_bot, current_round)
+                print("Please press enter to continue.")
+                time.sleep(2)
+                playing = False
+            elif Bot.can_buy(current_bot) is False:
+                Menu.stat_screen(current_bot, current_round)
+                print("Would you like to Sell or Pass?")
+                print("Sell")
+                Bot.bot_sell(current_bot)
+            elif Bot.can_sell(current_bot) is False:
+                Menu.stat_screen(current_bot, current_round)
+                print("Would you like to Buy or Pass?")
+                print("Buy")
+                Bot.bot_buy(current_bot)
+            else:
+                Menu.stat_screen(current_bot, current_round)
+                print("Would you like to Buy, Sell, or Pass?")
+                print("Sell")
+                Bot.bot_sell(current_bot)
+
+    def can_buy(current_bot):
+        if Player.players[current_bot].difficulty == 1:
+            Bot.low_risk(current_bot)
+            bot_buy = Bot.buy_list
+            if bool(bot_buy) is False:
+                return False
+            else:
+                return True
+        elif Player.players[current_bot].difficulty == 2:
+            Bot.medium_risk(current_bot)
+            bot_buy = Bot.buy_list
+            if bool(bot_buy) is False:
+                return False
+            else:
+                return True
+        else:
+            Bot.high_risk(current_bot)
+            bot_buy = Bot.buy_list
+            if bool(bot_buy) is False:
+                return False
+            else:
+                return True
+
+    def bot_buy(current_bot):
+        """Bot buy stock method"""
+        print("Which stock would you like to buy?")
+        buy_name = random.choice(Bot.buy_list)
+        print(buy_name)
+        print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
+        print("How many shares do you wish to buy?")
+        #!either make bot buy max amount, or keep buying random amounts between 1 - max purchase
+        buy_number = Player.max_purchase(buy_name, current_bot)
+        print(buy_number)
+        Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
+        Player.players[current_bot].stocks[buy_name] += buy_number
+        Bot.buy_list = []
+        time.sleep(3)
+
+    def can_sell(current_bot):
+        if Player.players[current_bot].difficulty == 1:
+            Bot.low_risk(current_bot)
+            bot_sell = Bot.sell_list
+            if bool(bot_sell) is False:
+                return False
+            else:
+                return True
+        elif Player.players[current_bot].difficulty == 2:
+            Bot.medium_risk(current_bot)
+            bot_sell = Bot.sell_list
+            if bool(bot_sell) is False:
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def bot_sell(current_bot):
+        """Low risk level sell stock method"""
+        print("Which stock would you like to sell?")
+        sell_name = random.choice(Bot.sell_list)
+        print(sell_name)
+        #!replace stock_index object with stock_index function
+        sell_index = Stock.stock_name.index(sell_name)
+        max_sell = Player.players[current_bot].stocks[sell_name]
+        print(f"How many shares of {sell_name} do you want to sell?")
+        print(max_sell)
+        Player.players[current_bot].money += max_sell * Stock.stocks[sell_index].value
+        Player.players[current_bot].stocks[sell_name] -= max_sell
+        Bot.sell_list = []
+        time.sleep(3)
 
     def low_risk(current_bot):
         """Difficulty level: 1."""
-        #!first action will be selling using sell list
-        #!then buying with buy list
-
-        buy_list = []
-        sell_list = []
-
         for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value > 95:
-                buy_list.append(Stock.stocks[k].name)
+                Bot.buy_list.append(Stock.stocks[k].name)
             if Stock.stocks[k].value < 30:
-                sell_list.append(Stock.stocks[k].name)
-
-            if buy_list == []:
-                break
-            else:
-                Bot.bot_buy(current_bot)
-
-        def bot_buy(current_bot):
-            """Bot buy stock method"""
-            
-            print("Which stock would you like to buy?\n")
-            buy_name = random.choice(buy_list)
-            print(buy_name)
-            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
-            print("How many shares do you wish to buy?\n")
-            buy_number = Player.max_purchase(buy_name, current_bot)
-            print(buy_number)
-            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
-            Player.players[current_bot].stocks[buy_name] += buy_number
-
-    
-        def bot_sell(current_bot):
-            """Low risk level sell stock method"""
-            print("Which stock would you like to sell?\n")
-            sell_name = random.choice(sell_list)
-            print(sell_name)
-            #!replace stock_index object with stock_index function
-            sell_index = Stock.stock_name.index(sell_name)
-            max_sell = Player.players[current_bot].stocks[sell_name]
-            print(f"How many shares of {sell_name} do you want to sell?\n")
-            print(max_sell)
-            Player.players[current_bot].money += max_sell * Stock.stocks[sell_index].value
-            Player.players[current_bot].stocks[sell_name] -= max_sell
-
-        pass
+                Bot.sell_list.append(Stock.stocks[k].name)
 
     def medium_risk(current_bot):
         """Difficulty level: 2."""
-        #!first action will be selling using sell list
-        #!then buying with buy list
-
-        buy_list = []
-        sell_list = []
-
         for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value > 175:
-                buy_list.append(Stock.stocks[k].name)
+                Bot.buy_list.append(Stock.stocks[k].name)
             if Stock.stocks[k].value < 30:
-                sell_list.append(Stock.stocks[k].name)
-
-        def buy_stock():
-            """Medium risk level buy stock method"""
-            print("Which stock would you like to buy?\n")
-            buy_name = random.choice(buy_list)
-            print(buy_name)
-            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
-            print("How many shares do you wish to buy?\n")
-            buy_number = Player.max_purchase(buy_name, current_bot)
-            print(buy_number)
-            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
-            Player.players[current_bot].stocks[buy_name] += buy_number
-    
-        def sell_stock():
-            """Medium risk level sell stock method"""
-            pass
-        pass
+                Bot.sell_list.append(Stock.stocks[k].name)
 
     def high_risk(current_bot):
         """Difficulty level: 3."""
-        #!create 2 lists: buy_high with stock name with value 180 or higher. 
-        #!                buy_low with stock name with value 20 or under.
-        #!then bot buys stocks from buy_high first, 
-
-        buy_list = []
-
         for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value > 175:
-                buy_list.append(Stock.stocks[k].name)
+                Bot.buy_list.append(Stock.stocks[k].name)
             if Stock.stocks[k].value < 25:
-                buy_list.append(Stock.stocks[k].name)
-
-        def buy_stock():
-            """High risk level buy stock method"""
-            print("Which stock would you like to buy?\n")
-            buy_name = random.choice(buy_list)
-            print(buy_name)
-            print(f"You can buy {Player.max_purchase(buy_name, current_bot)} share(s) of {buy_name}.")
-            print("How many shares do you wish to buy?\n")
-            buy_number = Player.max_purchase(buy_name, current_bot)
-            print(buy_number)
-            Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
-            Player.players[current_bot].stocks[buy_name] += buy_number
-
-        pass
+                Bot.buy_list.append(Stock.stocks[k].name)
 
 class Stock:
     "Stock value"
@@ -380,7 +397,7 @@ class Menu:
     rounds = 0
     num_bots = 0
     num_humans = 0
-    num_players = num_bots + num_humans
+    num_players = 0
 
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
@@ -428,12 +445,10 @@ class Menu:
 
         #Choose between bots, bots/humans, humans, count total players
         Menu.player_type()
+        Menu.num_players = Menu.num_bots + Menu.num_humans
 
-        #!Name all players
-        #!Player.name_player(Menu.num_players)
-
-        #Name all players, including bots
-        #Only bots
+        #Name bot and human players:
+        #Only bots        
         if Menu.num_bots > 0 and Menu.num_humans == 0:
             Player.name_bots(Menu.num_bots)
         #Bots and humans
@@ -444,18 +459,25 @@ class Menu:
         else:
             Player.name_humans(Menu.num_players)
 
+        if Menu.num_bots > 0:
+            for current_bot in range(Menu.num_bots):
+                Bot.set_difficulty(current_bot)
+
         #set number of rounds to be played in current game
         Menu.set_rounds()
 
         #Let players buy there initial stocks before rolling, 
         #but only move to next player when all money is gone 
         #or user chooses to end turn
-        for i in range(Menu.num_players):
+        for current_player in range(Menu.num_players):
             playing = True
             while playing:
-                if Player.can_buy(i):
-                    Menu.stat_screen(i)
-                    Player.buy_stock(i)
+                if current_player <= Menu.num_bots and Player.can_buy(current_player):
+                    Menu.stat_screen(current_player)
+                    Bot.bot_start(current_player)
+                elif current_player > Menu.num_bots and Player.can_buy(current_player):
+                    Menu.stat_screen(current_player)
+                    Player.buy_stock(current_player)
                 else:
                     Menu.clear_console()
                     playing = False
@@ -469,13 +491,15 @@ class Menu:
         current_round = 1
         while current_round <= int(Menu.rounds):
             for current_player in range(0, Menu.num_players):
-                Menu.player_turn(current_player, current_round)
+                if current_player < Menu.num_bots:
+                    Bot.bot_turn(current_player, current_round)
+                Menu.human_turn(current_player, current_round)
             current_round += 1
             Menu.clear_console()
         Menu.end_game()
         
-    def player_turn(current_player, current_round):
-        """Handles full range of turn actions for player."""
+    def human_turn(current_player, current_round):
+        """Handles full range of turn actions for human players."""
         playing = True
         Dice.roll()
         while playing:
@@ -523,9 +547,9 @@ class Menu:
             ranking.update(player_value)
         sorted_ranking = dict(sorted(ranking.items(), key=operator.itemgetter(1), reverse=True))
 
+        print("Here is the final score for each player in descending order:")
         for i, c in enumerate(sorted_ranking):
-            print("Here is the final score for each player in descending order.")
-            print(f"{i+1}. Player {c} has ${sorted_ranking[c]}")
+            print(f"{i+1}. {c} has ${sorted_ranking[c]}")
         
     def about_page():
         """Displays About page, option 2 from main_menu()"""
@@ -616,10 +640,3 @@ class Menu:
                 print("That's not a proper choice!")
 
 Menu.main_menu()
-
-#! ADD: Incorporate bots into game in general.
-#!      -if num_bots > 0:
-#!      -*while/for loop incrementing current player to match num_bots
-#!      -   run bot command
-#!      -else:
-#!      -   run human commands
