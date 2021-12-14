@@ -505,18 +505,40 @@ class Menu:
         #Let players buy there initial stocks before rolling, 
         #but only move to next player when all money is gone 
         #or user chooses to end turn
-        for current_player in range(Menu.num_players):
-            playing = True
-            while playing:
-                if current_player <= Menu.num_bots and Player.can_buy(current_player):
-                    Menu.stat_screen(current_player)
-                    Bot.bot_start(current_player)
-                elif current_player > Menu.num_bots and Player.can_buy(current_player):
-                    Menu.stat_screen(current_player)
-                    Player.buy_stock(current_player)
-                else:
-                    Menu.clear_console()
-                    playing = False
+
+        #for current_player in range(0, Menu.num_players):
+        #Bots only
+        if Menu.num_bots > 0 and Menu.num_humans == 0:
+            for current_player in range(Menu.num_bots):
+                Menu.stat_screen(current_player)
+                Bot.bot_start(current_player)
+        #Bots and humans
+        elif Menu.num_bots > 0 and Menu.num_humans > 0:
+            for current_player in range(Menu.num_bots):
+                Menu.stat_screen(current_player)
+                Bot.bot_start(current_player)
+            for current_player in range(Menu.num_bots, Menu.num_players):
+                Menu.stat_screen(current_player)
+                Player.buy_stock(current_player)
+        #Humans only
+        elif Menu.num_bots == 0 and Menu.num_humans > 0: 
+            for current_player in range(0, Menu.num_players):
+                Menu.stat_screen(current_player)
+                Player.buy_stock(current_player)
+        Menu.clear_console()
+
+        # for current_player in range(Menu.num_players):
+        #     playing = True
+        #     while playing:
+        #         if current_player <= Menu.num_bots and Player.can_buy(current_player):
+        #             Menu.stat_screen(current_player)
+        #             Bot.bot_start(current_player)
+        #         elif current_player > Menu.num_bots and Player.can_buy(current_player):
+        #             Menu.stat_screen(current_player)
+        #             Player.buy_stock(current_player)
+        #         else:
+        #             Menu.clear_console()
+        #             playing = False
 
         #Run the main game now:
         Menu.clear_console()
@@ -524,21 +546,28 @@ class Menu:
 
     def main_game():
         """main gameplay loop"""
-        current_round = 1
-        current_player = 0
-        while current_round <= int(Menu.rounds):
-            while current_player < Menu.num_players:
-                while current_player < Menu.num_bots:
+        #counts rounds up
+        for current_round in range(1, Menu.rounds+1):
+
+            #Bots only
+            if Menu.num_bots > 0 and Menu.num_humans == 0:
+                for current_player in range(Menu.num_bots):
                     Bot.bot_turn(current_player, current_round)
-                    current_player += 1
-                    if current_player == Menu.num_players:
-                        current_player = 0
-                        current_round += 1
-                Menu.human_turn(current_player, current_round)
-                current_player += 1
-                if current_player == Menu.num_players:
-                        current_player = 0
-            current_round += 1
+                    
+            #Bots and humans
+            elif Menu.num_bots > 0 and Menu.num_humans > 0:
+                for current_player in range(Menu.num_bots):
+                    Bot.bot_turn(current_player, current_round)
+                for current_player in range(0, Menu.num_players):
+                    Menu.human_turn(current_player, current_round)
+
+            #Humans only
+            elif Menu.num_bots == 0 and Menu.num_humans > 0: 
+                print(f"humans only elif{current_round=}")
+                for current_player in range(0, Menu.num_players):
+                    print(f"humans only for{current_round=}{current_player=}")
+                    Menu.human_turn(current_player, current_round)
+
             Menu.clear_console()
         Menu.end_game()
         
@@ -640,13 +669,16 @@ class Menu:
 
     def stat_screen(current_player, current_round = False, dice_outcome = False):
         """Displays all viable information like play, stock, current round and dice roll."""
+        #Setup game section
         if current_round == False and dice_outcome == False:
             Menu.player_info(current_player)
             Menu.stock_info()
+        #If user is making multiple choices
         elif dice_outcome == False:
             print(f"{current_round}/{Menu.rounds}")
             Menu.player_info(current_player)
             Menu.stock_info()
+        #First move of every player
         else:
             print(f"{current_round}/{Menu.rounds}")
             print(dice_outcome)
