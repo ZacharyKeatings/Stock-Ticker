@@ -160,6 +160,7 @@ class Bot(Player):
 
     buy_list = []
     sell_list = []
+    available_stocks = []
 
     def __init__(self, difficulty = 0):
         super().__init__(self)
@@ -193,32 +194,32 @@ class Bot(Player):
         for i in Stock.stock_name:
             Bot.buy_list.append(i)
         Bot.bot_buy(current_bot)
-        Bot.buy_list = []
 
     def bot_turn(current_bot, current_round):
         """Handles full range of turn actions for human players."""
         playing = True
         Dice.roll()
-        Bot.buy_list = []
-        print(Bot.buy_list)
         while playing:
-            print(f"{Bot.can_buy(current_bot)=}\n{Bot.can_sell(current_bot)=}\n{Bot.buy_list=}\n{Bot.sell_list=}")
-            if Bot.can_buy(current_bot) is False and Player.can_buy(current_bot) is False and Bot.can_sell(current_bot) is False and Player.can_sell(current_bot) is False:
+            #If bot cant buy stock, and has no stock to sell based on difficulty, pass.
+            if Bot.can_buy(current_bot) is False and Bot.same_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Please press enter to continue.")
                 time.sleep(2)
                 playing = False
-            elif Bot.can_buy(current_bot) is False and Player.can_buy(current_bot) is False:
+            #if bot cant buy stock, but has stock to sell based on difficulty, sell or pass.
+            elif Bot.can_buy(current_bot) is False and Bot.same_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Sell or Pass?")
                 print("Sell")
                 Bot.bot_sell(current_bot)
-            elif Bot.can_sell(current_bot) is False and Player.can_sell(current_bot) is False:
+            #If bot can buy stock, but has no stock to sell based on difficulty, buy or pass.
+            elif Bot.can_sell(current_bot) is True and Bot.same_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy or Pass?")
                 print("Buy")
                 Bot.bot_buy(current_bot)
-            else:
+            #If bot can buy stock, and has stock to sell based on difficulty, buy sell or pass.
+            elif Bot.can_sell(current_bot) is True and Bot.same_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy, Sell, or Pass?")
                 print("Sell")
@@ -227,23 +228,19 @@ class Bot(Player):
     def can_buy(current_bot):
         if Player.players[current_bot].difficulty == 1:
             Bot.low_risk(current_bot)
-            bot_buy = Bot.buy_list
-            #!bool(bot_buy) is False and
             if Player.can_buy(current_bot) is False:
                 return False
             else:
                 return True
         elif Player.players[current_bot].difficulty == 2:
             Bot.medium_risk(current_bot)
-            bot_buy = Bot.buy_list
-            if bool(bot_buy) is False and Player.can_buy(current_bot) is False:
+            if Player.can_buy(current_bot) is False:
                 return False
             else:
                 return True
         else:
             Bot.high_risk(current_bot)
-            bot_buy = Bot.buy_list
-            if bool(bot_buy) is False and Player.can_buy(current_bot) is False:
+            if Player.can_buy(current_bot) is False:
                 return False
             else:
                 return True
@@ -260,22 +257,53 @@ class Bot(Player):
         print(buy_number)
         Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
         Player.players[current_bot].stocks[buy_name] += buy_number
-        time.sleep(3)
+        Bot.buy_list = []
+
+    def same_sell(current_bot):
+        """Checks contents of sell_list, 
+        compares it against current bot held stocks. 
+        if any matching, adds to available_stocks list."""
+
+        for i in Bot.sell_list:
+            for j in Player.players[current_bot].stocks[i]:
+                if i == j:
+                    Bot.available_stocks.append(i)
+
+        return bool(Bot.available_stocks)
 
     def can_sell(current_bot):
+        """Determines if sell list is populated, 
+        and if bot holds any stocks that match 
+        contents of sell list."""
         if Player.players[current_bot].difficulty == 1:
             Bot.low_risk(current_bot)
-            bot_sell = Bot.sell_list
-            if bool(bot_sell) is False and Player.can_sell(current_bot) is False:
+        #!Create check of contents sell_list and compare to bot held stocks.
+        #!if there are any matches, place in new list called available_stocks.
+            #If sell list is empty and player holds no stocks#!=====================
+            if bool(Bot.sell_list) is False and Player.can_sell(current_bot) is False:
                 return False
-            else:
+            #if sell list is empty and player holds stocks#!========================
+            elif bool(Bot.sell_list) is False and Player.can_sell(current_bot) is True:
+                return False
+            #if sell list is populated and player holds no stock#!==================
+            elif bool(Bot.sell_list) is True and Bot.same_sell(current_bot) is False:
+                return False
+            #if sell list is populated and player holds stock:#!====================
+            elif bool(Bot.sell_list) is True and Bot.same_sell(current_bot) is True:
                 return True
         elif Player.players[current_bot].difficulty == 2:
             Bot.medium_risk(current_bot)
-            bot_sell = Bot.sell_list
-            if bool(bot_sell) is False and Player.can_sell(current_bot) is False:
+            #If sell list is empty and player holds no stocks#!=====================
+            if bool(Bot.sell_list) is False and Player.can_sell(current_bot) is False:
                 return False
-            else:
+            #if sell list is empty and player holds stocks#!========================
+            elif bool(Bot.sell_list) is False and Player.can_sell(current_bot) is True:
+                return False
+            #if sell list is populated and player holds no stock#!==================
+            elif bool(Bot.sell_list) is True and Player.can_sell(current_bot) is False:
+                return False
+            #if sell list is populated and player holds stock:#!====================
+            elif bool(Bot.sell_list) is True and Player.can_sell(current_bot) is True:
                 return True
         else:
             return False
@@ -295,14 +323,20 @@ class Bot(Player):
 
     def low_risk(current_bot):
         """Difficulty level: 1."""
+        Bot.buy_list = []
+        Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value > 95:
+            if Stock.stocks[k].value > 95: 
                 Bot.buy_list.append(Stock.stocks[k].name)
+
+        for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value < 30:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
     def medium_risk(current_bot):
         """Difficulty level: 2."""
+        Bot.buy_list = []
+        Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value > 175:
                 Bot.buy_list.append(Stock.stocks[k].name)
@@ -311,6 +345,7 @@ class Bot(Player):
 
     def high_risk(current_bot):
         """Difficulty level: 3."""
+        Bot.buy_list = []
         for k, v in enumerate(Stock.stocks):
             if Stock.stocks[k].value > 175:
                 Bot.buy_list.append(Stock.stocks[k].name)
@@ -481,9 +516,6 @@ class Menu:
                     Player.buy_stock(current_player)
                 else:
                     Menu.clear_console()
-                    Bot.buy_list = []
-                    print(Bot.buy_list)
-                    time.sleep(5)
                     playing = False
 
         #Run the main game now:
@@ -493,11 +525,19 @@ class Menu:
     def main_game():
         """main gameplay loop"""
         current_round = 1
+        current_player = 0
         while current_round <= int(Menu.rounds):
-            for current_player in range(0, Menu.num_players):
-                if current_player < Menu.num_bots:
+            while current_player < Menu.num_players:
+                while current_player < Menu.num_bots:
                     Bot.bot_turn(current_player, current_round)
+                    current_player += 1
+                    if current_player == Menu.num_players:
+                        current_player = 0
+                        current_round += 1
                 Menu.human_turn(current_player, current_round)
+                current_player += 1
+                if current_player == Menu.num_players:
+                        current_player = 0
             current_round += 1
             Menu.clear_console()
         Menu.end_game()
@@ -645,5 +685,5 @@ class Menu:
 
 Menu.main_menu()
 
-#! FIX: Bot.buy_list gets populated x num_bots, but doesn't clear during Bot.bot_turn
-#! FIX: Bot.sell_list doesn't populate once a bot owns stock
+#! FIX: Menu.main_game doesn't loop rounds properly, goes past set rounds check.
+#! FIX: Menu.main_game needs rework for proper looping and conditionals.
