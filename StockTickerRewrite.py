@@ -2,7 +2,6 @@ import operator
 import random
 import time
 import math
-import sys
 import os
 
 class Player:
@@ -195,7 +194,7 @@ class Bot(Player):
         """returns list of current stocks bot owns"""
         holding = []
         for i in Stock.stock_name:
-            if Player.players[current_bot].stocks[Stock.stock_name[i]] > 0:
+            if Player.players[current_bot].stocks[i] > 0:
                 holding.append(i)
 
         return holding
@@ -280,6 +279,7 @@ class Bot(Player):
         print(buy_number)
         Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
         Player.players[current_bot].stocks[buy_name] += buy_number
+        time.sleep(1)
 
     def same_sell(current_bot):
         """Checks contents of sell_list, 
@@ -329,11 +329,11 @@ class Bot(Player):
         Bot.buy_list = []
         Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value > 95: 
+            if Stock.stocks[k].value > 20: 
                 Bot.buy_list.append(Stock.stocks[k].name)
 
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value < 30:
+            if Stock.stocks[k].value < 25:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
     def medium_risk(current_bot):
@@ -406,7 +406,7 @@ class Stock:
 
     def split_stock(stock):
         """Called from Stock.decrease_value(), handles removing all of selected stock from player inventory"""
-        Stock.stocks[stock].value = 100
+        Stock.stocks[Stock.stock_index(stock)].value = 100
         for i, v in enumerate(Player.players):
             Player.players[i].stocks[stock] = 0
 
