@@ -156,6 +156,7 @@ class Bot(Player):
     sell_list = []
     buyable_stocks = []
     sellable_stocks = []
+    sleep_time = 1
 
     def __init__(self, difficulty = 0):
         super().__init__(self)
@@ -169,11 +170,11 @@ class Bot(Player):
             ---------------------
 
             1. Low risk:   
-                -Buys: 25 to 100
-                -Sells: 20 and below
+                -Buys: 50 to 100
+                -Sells: 140 and above, 40 and below
             2. Medium risk 
-                -Buys: 180 and above
-                -Sells: 20 and below
+                -Buys: 140 and above
+                -Sells: 40 and below
             3. High risk   
                 -Buys: 180 and above, 20 and below
                 -Sells: Holds all stocks
@@ -207,35 +208,37 @@ class Bot(Player):
         playing = True
         Dice.roll()
         while playing:
+            print(f"{Bot.can_buy(current_bot)=}")
+            print(f"{Bot.can_sell(current_bot)=}")
             #If bot cant buy stock, and has no stock to sell based on difficulty, pass.
-            if Bot.can_buy(current_bot) is False and Bot.same_sell(current_bot) is False:
+            if Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Please press enter to continue.")
-                time.sleep(1)
+                time.sleep(Bot.sleep_time)
                 Menu.clear_console()
                 playing = False
             #if bot cant buy stock, but has stock to sell based on difficulty, sell or pass.
-            elif Bot.can_buy(current_bot) is False and Bot.same_sell(current_bot) is True:
+            elif Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Sell or Pass?")
                 print("Sell")
-                time.sleep(1)
+                time.sleep(Bot.sleep_time)
                 Bot.bot_sell(current_bot)
                 Menu.clear_console()
             #If bot can buy stock, but has no stock to sell based on difficulty, buy or pass.
-            elif Bot.can_buy(current_bot) is True and Bot.same_sell(current_bot) is False:
+            elif Bot.can_buy(current_bot) is True and Bot.can_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy or Pass?")
                 print("Buy")
-                time.sleep(1)
+                time.sleep(Bot.sleep_time)
                 Bot.bot_buy(current_bot)
                 Menu.clear_console()
             #If bot can buy stock, and has stock to sell based on difficulty, buy sell or pass.
-            elif Bot.can_buy(current_bot) is True and Bot.same_sell(current_bot) is True:
+            elif Bot.can_buy(current_bot) is True and Bot.can_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy, Sell, or Pass?")
                 print("Sell")
-                time.sleep(1)
+                time.sleep(Bot.sleep_time)
                 Bot.bot_sell(current_bot)
                 Menu.clear_console()
 
@@ -260,16 +263,14 @@ class Bot(Player):
                 return False
         elif Player.players[current_bot].difficulty == 2:
             Bot.medium_risk()
-            if Bot.buy_list:
-                if Player.can_buy(current_bot):
-                    return True
+            if Bot.same_buy(current_bot):
+                return True
             else:
                 return False
         else:
             Bot.high_risk()
-            if Bot.buy_list:
-                if Player.can_buy(current_bot):
-                    return True
+            if Bot.same_buy(current_bot):
+                return True
             else:
                 return False
 
@@ -285,7 +286,7 @@ class Bot(Player):
         print(buy_number)
         Player.players[current_bot].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name)].value)
         Player.players[current_bot].stocks[buy_name] += buy_number
-        time.sleep(1)
+        time.sleep(Bot.sleep_time)
 
     def same_sell(current_bot):
         """Checks contents of sell_list, 
@@ -333,11 +334,11 @@ class Bot(Player):
         Bot.buy_list = []
         Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value >= 25 and Stock.stocks[k].value <= 100: 
+            if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100: 
                 Bot.buy_list.append(Stock.stocks[k].name)
 
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value <= 20:
+            if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
     def medium_risk():
@@ -345,11 +346,11 @@ class Bot(Player):
         Bot.buy_list = []
         Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value >= 180:
+            if Stock.stocks[k].value >= 140:
                 Bot.buy_list.append(Stock.stocks[k].name)
 
         for k, v in enumerate(Stock.stocks):  
-            if Stock.stocks[k].value <= 20:
+            if Stock.stocks[k].value <= 40:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
     def high_risk():
