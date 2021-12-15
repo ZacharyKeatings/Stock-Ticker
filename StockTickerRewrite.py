@@ -168,12 +168,15 @@ class Bot(Player):
             Choose Bot Difficulty
             ---------------------
 
-            1. Low risk:   -Buys: Any stock under 100, but above 30
-                           -Sells: When held stocks hit 25 or below
-            2. Medium risk -Buys: Prioritizes stocks valued at 180 or above
-                           -Sells: When held stocks hit 25 or below
-            3. High risk   -Buys: Prioritizes stocks valued near 180 and 20
-                           -Sells: Holds all stocks
+            1. Low risk:   
+                -Buys: 25 to 100
+                -Sells: 20 and below
+            2. Medium risk 
+                -Buys: 180 and above
+                -Sells: 20 and below
+            3. High risk   
+                -Buys: 180 and above, 20 and below
+                -Sells: Holds all stocks
 
             """)
         choice = Menu.ask_question(f"Which difficulty level will {Player.players[current_bot].name} be set to?\n", Menu.menu)
@@ -218,6 +221,7 @@ class Bot(Player):
                 print("Sell")
                 time.sleep(1)
                 Bot.bot_sell(current_bot)
+                Menu.clear_console()
             #If bot can buy stock, but has no stock to sell based on difficulty, buy or pass.
             elif Bot.can_buy(current_bot) is True and Bot.same_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
@@ -225,6 +229,7 @@ class Bot(Player):
                 print("Buy")
                 time.sleep(1)
                 Bot.bot_buy(current_bot)
+                Menu.clear_console()
             #If bot can buy stock, and has stock to sell based on difficulty, buy sell or pass.
             elif Bot.can_buy(current_bot) is True and Bot.same_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
@@ -232,6 +237,7 @@ class Bot(Player):
                 print("Sell")
                 time.sleep(1)
                 Bot.bot_sell(current_bot)
+                Menu.clear_console()
 
     def same_buy(current_bot):
         """Append stocks to Bot.buyable_stocks 
@@ -247,20 +253,20 @@ class Bot(Player):
 
     def can_buy(current_bot):
         if Player.players[current_bot].difficulty == 1:
-            Bot.low_risk(current_bot)
+            Bot.low_risk()
             if Bot.same_buy(current_bot):
                 return True
             else:
                 return False
         elif Player.players[current_bot].difficulty == 2:
-            Bot.medium_risk(current_bot)
+            Bot.medium_risk()
             if Bot.buy_list:
                 if Player.can_buy(current_bot):
                     return True
             else:
                 return False
         else:
-            Bot.high_risk(current_bot)
+            Bot.high_risk()
             if Bot.buy_list:
                 if Player.can_buy(current_bot):
                     return True
@@ -286,9 +292,7 @@ class Bot(Player):
         compares it against current bot held stocks. 
         if any matching, adds to sellable_stocks list."""
         Bot.sellable_stocks = []
-        #Which stocks fit sell criteria?
         for i in Bot.sell_list:
-            #Which stocks does bot hold
             if i in Bot.bot_holding(current_bot):
                 Bot.sellable_stocks.append(i)
 
@@ -299,13 +303,13 @@ class Bot(Player):
         and if bot holds any stocks that match 
         contents of sell list."""
         if Player.players[current_bot].difficulty == 1:
-            Bot.low_risk(current_bot)
+            Bot.low_risk()
             if Bot.same_sell(current_bot):
                 return True
             else:
                 return False
         elif Player.players[current_bot].difficulty == 2:
-            Bot.medium_risk(current_bot)
+            Bot.medium_risk()
             if Bot.same_sell(current_bot):
                 return True
             else:
@@ -324,35 +328,35 @@ class Bot(Player):
         Player.players[current_bot].money += max_sell * Stock.stocks[Stock.stock_index(sell_name)].value
         Player.players[current_bot].stocks[sell_name] -= max_sell
 
-    def low_risk(current_bot):
+    def low_risk():
         """Difficulty level: 1."""
         Bot.buy_list = []
         Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value > 20: 
+            if Stock.stocks[k].value >= 25 and Stock.stocks[k].value <= 100: 
                 Bot.buy_list.append(Stock.stocks[k].name)
 
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value < 25:
+            if Stock.stocks[k].value <= 20:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
-    def medium_risk(current_bot):
+    def medium_risk():
         """Difficulty level: 2."""
         Bot.buy_list = []
         Bot.sell_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value > 175:
+            if Stock.stocks[k].value >= 180:
                 Bot.buy_list.append(Stock.stocks[k].name)
-            if Stock.stocks[k].value < 30:
+
+        for k, v in enumerate(Stock.stocks):  
+            if Stock.stocks[k].value <= 20:
                 Bot.sell_list.append(Stock.stocks[k].name)
 
-    def high_risk(current_bot):
+    def high_risk():
         """Difficulty level: 3."""
         Bot.buy_list = []
         for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value > 175:
-                Bot.buy_list.append(Stock.stocks[k].name)
-            if Stock.stocks[k].value < 25:
+            if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20:
                 Bot.buy_list.append(Stock.stocks[k].name)
 
 class Stock:
@@ -552,7 +556,7 @@ class Menu:
             elif Menu.num_bots > 0 and Menu.num_humans > 0:
                 for current_player in range(Menu.num_bots):
                     Bot.bot_turn(current_player, current_round)
-                for current_player in range(0, Menu.num_players):
+                for current_player in range(Menu.num_bots, Menu.num_players):
                     Menu.human_turn(current_player, current_round)
 
             #Humans only
@@ -708,9 +712,3 @@ class Menu:
                 print("That's not a proper choice!")
 
 Menu.main_menu()
-
-#! Create new list like same sell called same buy:
-#!      take buy_list, check if player can afford each stock
-#!          if they can, append to new list
-#! if new list is True, pull from list, if not, can buy should be false
-
