@@ -193,25 +193,10 @@ class Bot(Player):
         Bot.buyable_stocks = [i for i in Stock.stock_name]
         Bot.bot_buy(current_bot)
 
-    # def bot_start(current_bot):
-    #     """Runs in Menu.setup_game only"""
-    #     for i in Stock.stock_name:
-    #         Bot.buyable_stocks.append(i)
-    #     Bot.bot_buy(current_bot)
-
     def bot_holding(current_bot):
         """returns list of current stocks bot owns"""
         holding = [i for i in Stock.stock_name if Player.players[current_bot].stocks[i] > 0]
         return holding
-
-    # def bot_holding(current_bot):
-    #     """returns list of current stocks bot owns"""
-    #     holding = []
-    #     for i in Stock.stock_name:
-    #         if Player.players[current_bot].stocks[i] > 0:
-    #             holding.append(i)
-
-    #     return holding
 
     def bot_turn(current_bot, current_round):
         """Handles full range of turn actions for human players."""
@@ -254,17 +239,6 @@ class Bot(Player):
         """Append stocks to Bot.buyable_stocks 
         if stock is within criteria and bot can afford it"""
         Bot.buyable_stocks = [i for i in Bot.buy_list if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money]
-
-    # def same_buy(current_bot):
-    #     """Append stocks to Bot.buyable_stocks 
-    #     if stock is within criteria and bot can afford it"""
-    #     Bot.buyable_stocks = []
-    #     #which stocks fit buy criteria?
-    #     for i in Bot.buy_list:
-    #         #which stock can bot afford?
-    #         if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money:
-    #             Bot.buyable_stocks.append(i)
-
         return bool(Bot.buyable_stocks)
 
     def can_buy(current_bot):
@@ -347,45 +321,14 @@ class Bot(Player):
         Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100]
         Bot.sell_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140]
 
-    # def low_risk():
-    #     """Difficulty level: 1."""
-    #     Bot.buy_list = []
-    #     Bot.sell_list = []
-    #     for k, v in enumerate(Stock.stocks):
-    #         if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100: 
-    #             Bot.buy_list.append(Stock.stocks[k].name)
-
-    #     for k, v in enumerate(Stock.stocks):
-    #         if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140:
-    #             Bot.sell_list.append(Stock.stocks[k].name)
-
     def medium_risk():
         """Difficulty level: 2."""
         Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 140]
         Bot.sell_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value <= 40]
 
-    # def medium_risk():
-    #     """Difficulty level: 2."""
-    #     Bot.buy_list = []
-    #     Bot.sell_list = []
-    #     for k, v in enumerate(Stock.stocks):
-    #         if Stock.stocks[k].value >= 140:
-    #             Bot.buy_list.append(Stock.stocks[k].name)
-
-    #     for k, v in enumerate(Stock.stocks):  
-    #         if Stock.stocks[k].value <= 40:
-    #             Bot.sell_list.append(Stock.stocks[k].name)
-
     def high_risk():
         """Difficulty level: 3."""
         Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20]
-
-    # def high_risk():
-    #     """Difficulty level: 3."""
-    #     Bot.buy_list = []
-    #     for k, v in enumerate(Stock.stocks):
-    #         if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20:
-    #             Bot.buy_list.append(Stock.stocks[k].name)
 
 class Stock:
     "Stock value"
@@ -411,8 +354,6 @@ class Stock:
         """Takes stock name and returns the associated stock index"""
         if stock_name in Stock.stock_name:
             return Stock.stock_name.index(stock_name)
-        else:                      #!----------------needed?
-            return "Unknown stock" #!----------------needed?
 
     def increase_value(stock, amount):
         """Called from Dice.roll(), handles increasing value of selected stock"""
