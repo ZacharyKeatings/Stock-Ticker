@@ -156,7 +156,7 @@ class Bot(Player):
     sell_list = []
     buyable_stocks = []
     sellable_stocks = []
-    sleep_time = 1
+    sleep_time = 0
 
     def __init__(self, difficulty = 0):
         super().__init__(self)
@@ -190,26 +190,34 @@ class Bot(Player):
 
     def bot_start(current_bot):
         """Runs in Menu.setup_game only"""
-        for i in Stock.stock_name:
-            Bot.buyable_stocks.append(i)
+        Bot.buyable_stocks = [i for i in Stock.stock_name]
         Bot.bot_buy(current_bot)
+
+    # def bot_start(current_bot):
+    #     """Runs in Menu.setup_game only"""
+    #     for i in Stock.stock_name:
+    #         Bot.buyable_stocks.append(i)
+    #     Bot.bot_buy(current_bot)
 
     def bot_holding(current_bot):
         """returns list of current stocks bot owns"""
-        holding = []
-        for i in Stock.stock_name:
-            if Player.players[current_bot].stocks[i] > 0:
-                holding.append(i)
-
+        holding = [i for i in Stock.stock_name if Player.players[current_bot].stocks[i] > 0]
         return holding
+
+    # def bot_holding(current_bot):
+    #     """returns list of current stocks bot owns"""
+    #     holding = []
+    #     for i in Stock.stock_name:
+    #         if Player.players[current_bot].stocks[i] > 0:
+    #             holding.append(i)
+
+    #     return holding
 
     def bot_turn(current_bot, current_round):
         """Handles full range of turn actions for human players."""
         playing = True
         Dice.roll()
         while playing:
-            print(f"{Bot.can_buy(current_bot)=}")
-            print(f"{Bot.can_sell(current_bot)=}")
             #If bot cant buy stock, and has no stock to sell based on difficulty, pass.
             if Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
@@ -245,12 +253,17 @@ class Bot(Player):
     def same_buy(current_bot):
         """Append stocks to Bot.buyable_stocks 
         if stock is within criteria and bot can afford it"""
-        Bot.buyable_stocks = []
-        #which stocks fit buy criteria?
-        for i in Bot.buy_list:
-            #which stock can bot afford?
-            if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money:
-                Bot.buyable_stocks.append(i)
+        Bot.buyable_stocks = [i for i in Bot.buy_list if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money]
+
+    # def same_buy(current_bot):
+    #     """Append stocks to Bot.buyable_stocks 
+    #     if stock is within criteria and bot can afford it"""
+    #     Bot.buyable_stocks = []
+    #     #which stocks fit buy criteria?
+    #     for i in Bot.buy_list:
+    #         #which stock can bot afford?
+    #         if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money:
+    #             Bot.buyable_stocks.append(i)
 
         return bool(Bot.buyable_stocks)
 
@@ -331,34 +344,48 @@ class Bot(Player):
 
     def low_risk():
         """Difficulty level: 1."""
-        Bot.buy_list = []
-        Bot.sell_list = []
-        for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100: 
-                Bot.buy_list.append(Stock.stocks[k].name)
+        Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100]
+        Bot.sell_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140]
 
-        for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140:
-                Bot.sell_list.append(Stock.stocks[k].name)
+    # def low_risk():
+    #     """Difficulty level: 1."""
+    #     Bot.buy_list = []
+    #     Bot.sell_list = []
+    #     for k, v in enumerate(Stock.stocks):
+    #         if Stock.stocks[k].value >= 50 and Stock.stocks[k].value <= 100: 
+    #             Bot.buy_list.append(Stock.stocks[k].name)
+
+    #     for k, v in enumerate(Stock.stocks):
+    #         if Stock.stocks[k].value <= 40 and Stock.stocks[k].value >= 140:
+    #             Bot.sell_list.append(Stock.stocks[k].name)
 
     def medium_risk():
         """Difficulty level: 2."""
-        Bot.buy_list = []
-        Bot.sell_list = []
-        for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value >= 140:
-                Bot.buy_list.append(Stock.stocks[k].name)
+        Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 140]
+        Bot.sell_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value <= 40]
 
-        for k, v in enumerate(Stock.stocks):  
-            if Stock.stocks[k].value <= 40:
-                Bot.sell_list.append(Stock.stocks[k].name)
+    # def medium_risk():
+    #     """Difficulty level: 2."""
+    #     Bot.buy_list = []
+    #     Bot.sell_list = []
+    #     for k, v in enumerate(Stock.stocks):
+    #         if Stock.stocks[k].value >= 140:
+    #             Bot.buy_list.append(Stock.stocks[k].name)
+
+    #     for k, v in enumerate(Stock.stocks):  
+    #         if Stock.stocks[k].value <= 40:
+    #             Bot.sell_list.append(Stock.stocks[k].name)
 
     def high_risk():
         """Difficulty level: 3."""
-        Bot.buy_list = []
-        for k, v in enumerate(Stock.stocks):
-            if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20:
-                Bot.buy_list.append(Stock.stocks[k].name)
+        Bot.buy_list = [Stock.stocks[k].name for k, v in enumerate(Stock.stocks) if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20]
+
+    # def high_risk():
+    #     """Difficulty level: 3."""
+    #     Bot.buy_list = []
+    #     for k, v in enumerate(Stock.stocks):
+    #         if Stock.stocks[k].value >= 180 or Stock.stocks[k].value <= 20:
+    #             Bot.buy_list.append(Stock.stocks[k].name)
 
 class Stock:
     "Stock value"
@@ -380,16 +407,12 @@ class Stock:
             stock = Stock(name=v)
             Stock.stocks.append(stock)
 
-    # def stocks_name(stock_index):
-    #     name = Stock.stock_name[int(stock_index)]
-    #     return name
-
     def stock_index(stock_name):
         """Takes stock name and returns the associated stock index"""
         if stock_name in Stock.stock_name:
             return Stock.stock_name.index(stock_name)
-        else:
-            return "Unknown stock"
+        else:                      #!----------------needed?
+            return "Unknown stock" #!----------------needed?
 
     def increase_value(stock, amount):
         """Called from Dice.roll(), handles increasing value of selected stock"""
@@ -429,7 +452,7 @@ class Dice:
         print(stock, action, amount)
         if action == Dice.action[0]:
             Stock.increase_value(stock, amount)
-        elif action == Dice.action [1]:
+        elif action == Dice.action[1]:
             Stock.decrease_value(stock, amount)
         else:
             Player.dividend(stock, amount)
@@ -446,7 +469,7 @@ class Menu:
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
     action = ["Buy", "Sell", "Pass", ""]
-    amount = [i for i in range(1, 1001)]
+    amount = [i for i in range(1, 10001)]
     num_player = [i for i in range(1, 9)]
     num_bot = [i for i in range(1, 9)]
     num_human = [i for i in range(2, 9)]
