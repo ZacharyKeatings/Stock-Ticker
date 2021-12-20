@@ -5,13 +5,15 @@ import math
 import os
 
 class Player:
-    "Player stats"
+    "Handles total player data, and all human player methods"
 
     players = []
     can_sellstock = []
 
     def __init__(self, name = "", money = 5000):
-        """stocks refer to quantity of given stock. money is available money. name is chosen by user"""
+        """stocks refer to quantity of given stock. 
+        money is available money. 
+        name is chosen by user"""
         self.name = name
         self.money = money
         #Change stocks names here and in Stock class
@@ -23,6 +25,96 @@ class Player:
             "Grain": 0,
             "Industrial": 0
             }
+
+    def create_humans(player_type):
+        """Creates user chosen number of human players (2 to 8)"""
+        Menu.clear_console()
+        if player_type == 2:
+            num_humans = int(Menu.ask_question(f"""
+            Choose Number Of People
+            -----------------------
+
+            Please choose the number 
+            of people you would like 
+            to include between 1 - {8 - Menu.num_bots}.
+
+            """, Menu.numhumans_response))
+            return num_humans
+        elif player_type == 3:
+            num_humans = int(Menu.ask_question(f"""
+            Choose Number Of People
+            -----------------------
+
+            Please choose the number 
+            of people you would like 
+            to include between {min(Menu.num_human)} - {max(Menu.num_human)}
+            """, Menu.num_human))
+            return num_humans
+
+    def name_humans(num_humans):
+        """Asks player to choose name for each human player"""
+        Menu.clear_console()
+        for human in range(1, Menu.num_humans+1):
+            player = Player(Menu.ask_question(f"What is Player {human}'s name?\n", "name"))
+            print(f"Player {human} is now named: {player.name}")
+            Player.players.append(player)
+
+    def can_buy(current_player):
+        """Checks if player can afford any stocks."""
+        current_prices = []
+        for num in range(0, len(Stock.stocks)):
+            stock_price = Stock.stocks[num].value
+            current_prices.append(stock_price)
+        if Player.players[current_player].money < min(current_prices):
+            return False
+        else:
+            return True
+
+    def max_purchase(stock_name, current_player):
+        """Defines the highest quantity of selected 
+        stock player can purchase with current funds"""
+        max_purchase = math.trunc(int(Player.players[current_player].money) / Stock.stocks[Stock.stock_index(stock_name.capitalize())].value)
+        return max_purchase
+
+    def buy_stock(current_player):
+        """Human chooses which stock to buy and the quantity"""
+        buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks)
+        print(f"You can buy {Player.max_purchase(buy_name, current_player)} share(s) of {buy_name}.")
+        buy_number = int(Menu.ask_question("How many shares do you wish to buy?\n", range(0,Player.max_purchase(buy_name, current_player))))
+        Player.players[current_player].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name.capitalize())].value)
+        Player.players[current_player].stocks[buy_name.capitalize()] += buy_number
+
+    def can_sell(current_player):
+        """Checks if the current player has any stocks to sell."""
+        Player.can_sellstock = []
+        for key in Player.players[current_player].stocks:
+            value = Player.players[current_player].stocks[key]
+            if value > 0:
+                Player.can_sellstock.append(key)
+        
+        return bool(Player.can_sellstock)
+
+    def sell_stock(current_player):
+        """User choose which stock to sell and the quantity"""
+        sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sellstock)
+        max_sell = Player.players[current_player].stocks[sell_name.capitalize()]
+        sell_amount = int(Menu.ask_question(f"How many shares of {sell_name.capitalize()} do you want to sell?\n", range(0, max_sell)))
+        Player.players[current_player].money += sell_amount * Stock.stocks[Stock.stock_index(sell_name.capitalize())].value
+        Player.players[current_player].stocks[sell_name.capitalize()] -= sell_amount
+
+class Bot(Player):
+    "Inherits from Player and handles all bot logic"
+
+    buy_list = []
+    sell_list = []
+    buyable_stocks = []
+    sellable_stocks = []
+    sleep_time = 0
+
+    def __init__(self, difficulty = 0):
+        "Adds difficulty setting on just bot players"
+        super().__init__(self)
+        self.difficulty = difficulty
 
     def create_bots(player_type):
         """Creates user selected number of bots (1 - 8)"""
@@ -52,118 +144,19 @@ class Player:
             """, Menu.num_bot))
             return num_bots
 
-    def create_humans(player_type):
-        """Creates user chosen number of human players (2 to 8)"""
-        Menu.clear_console()
-        if player_type == 2:
-            num_humans = int(Menu.ask_question(f"""
-            Choose Number Of People
-            -----------------------
-
-            Please choose the number 
-            of people you would like 
-            to include between 1 - {8 - Menu.num_bots}.
-
-            """, Menu.numhumans_response))
-            return num_humans
-        elif player_type == 3:
-            num_humans = int(Menu.ask_question(f"""
-            Choose Number Of People
-            -----------------------
-
-            Please choose the number 
-            of people you would like 
-            to include between {min(Menu.num_human)} - {max(Menu.num_human)}
-            """, Menu.num_human))
-            return num_humans
-
     def name_bots(num_bots):
+        """Asks player to choose name for each bot"""
         Menu.clear_console()
         for bots in range(1, Menu.num_bots+1):
-            name = Menu.ask_question(f"What is Bot #{bots}'s name?\n", Menu.name) + " The Bot"
+            name = Menu.ask_question(f"What is Bot #{bots}'s name?\n", "name") + " The Bot"
             player = Bot()
             print(f"Bot #{bots} is now named: {name}.")
             Player.players.append(player)
             Player.players[bots-1].name = name
 
-    def name_humans(num_humans):
-        Menu.clear_console()
-        for human in range(1, Menu.num_humans+1):
-            player = Player(Menu.ask_question(f"What is Player {human}'s name?\n", Menu.name))
-            print(f"Player {human} is now named: {player.name}")
-            Player.players.append(player)
-
-    def can_buy(current_player):
-        """Checks if player can afford any stocks."""
-        current_prices = []
-        for num in range(0, len(Stock.stocks)):
-            stock_price = Stock.stocks[num].value
-            current_prices.append(stock_price)
-        if Player.players[current_player].money < min(current_prices):
-            return False
-        else:
-            return True
-
-    def max_purchase(stock_name, current_player):
-        """Defines the highest quantity of selected stock user can purchase with current funds"""
-        max_purchase = math.trunc(int(Player.players[current_player].money) / Stock.stocks[Stock.stock_index(stock_name.capitalize())].value)
-        return max_purchase
-
-    def buy_stock(current_player):
-        """User chooses which stock to buy and the quantity"""
-        buy_name = Menu.ask_question("Which stock would you like to buy?\n", Menu.stocks)
-        print(f"You can buy {Player.max_purchase(buy_name, current_player)} share(s) of {buy_name}.")
-        buy_number = int(Menu.ask_question("How many shares do you wish to buy?\n", range(0,Player.max_purchase(buy_name, current_player))))
-        Player.players[current_player].money -= (buy_number * Stock.stocks[Stock.stock_index(buy_name.capitalize())].value)
-        Player.players[current_player].stocks[buy_name.capitalize()] += buy_number
-
-    def can_sell(current_player):
-        """Checks if the current player has any stocks to sell."""
-        Player.can_sellstock = []
-        for key in Player.players[current_player].stocks:
-            value = Player.players[current_player].stocks[key]
-            if value > 0:
-                Player.can_sellstock.append(key)
-        
-        return bool(Player.can_sellstock)
-
-    def sell_stock(current_player):
-        """User choose which stock to sell and the quantity"""
-        sell_name = Menu.ask_question("Which stock would you like to sell?\n", Player.can_sellstock)
-        max_sell = Player.players[current_player].stocks[sell_name.capitalize()]
-        sell_amount = int(Menu.ask_question(f"How many shares of {sell_name.capitalize()} do you want to sell?\n", range(0, max_sell)))
-        Player.players[current_player].money += sell_amount * Stock.stocks[Stock.stock_index(sell_name.capitalize())].value
-        Player.players[current_player].stocks[sell_name.capitalize()] -= sell_amount
-
-    def dividend(stock, div_roll):
-        """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
-        dividend = (div_roll / 100) + 1
-        if Stock.stocks[Stock.stock_index(stock)].value >= 100:
-            print(f"{stock} will pay out {div_roll}%.")
-            for i, v in enumerate(Player.players):
-                bonus = Player.players[i].stocks[stock] * dividend
-                Player.players[i].money = Player.players[i].money + int(bonus)
-                Player.players[i].money = int(Player.players[i].money)
-                print(f"{Player.players[i].name} received ${int(bonus)}.")
-        else:
-            print(f"{stock} is under 100 and will not payout.")
-            return None
-
-class Bot(Player):
-    "All actions for bots"
-
-    buy_list = []
-    sell_list = []
-    buyable_stocks = []
-    sellable_stocks = []
-    sleep_time = 0
-
-    def __init__(self, difficulty = 0):
-        super().__init__(self)
-        self.difficulty = difficulty
-
     def set_difficulty(current_bot):
-        """This sets the difficulty level for a selected bot in the game."""
+        """This sets the difficulty level 
+        for a selected bot in the game."""
         Menu.clear_console()
         print("""
             Choose Bot Difficulty
@@ -193,25 +186,20 @@ class Bot(Player):
         Bot.buyable_stocks = [i for i in Stock.stock_name]
         Bot.bot_buy(current_bot)
 
-    def bot_holding(current_bot):
-        """returns list of current stocks bot owns"""
-        holding = [i for i in Stock.stock_name if Player.players[current_bot].stocks[i] > 0]
-        return holding
-
     def bot_turn(current_bot, current_round):
-        """Handles full range of turn actions for human players."""
+        """Handles full range of turn actions for bots."""
         playing = True
         Dice.roll()
         while playing:
             #If bot cant buy stock, and has no stock to sell based on difficulty, pass.
-            if Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is False:
+            if Bot.consider_buy(current_bot) is False and Bot.can_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Please press enter to continue.")
                 time.sleep(Bot.sleep_time)
                 Menu.clear_console()
                 playing = False
             #if bot cant buy stock, but has stock to sell based on difficulty, sell or pass.
-            elif Bot.can_buy(current_bot) is False and Bot.can_sell(current_bot) is True:
+            elif Bot.consider_buy(current_bot) is False and Bot.can_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Sell or Pass?")
                 print("Sell")
@@ -219,7 +207,7 @@ class Bot(Player):
                 Bot.bot_sell(current_bot)
                 Menu.clear_console()
             #If bot can buy stock, but has no stock to sell based on difficulty, buy or pass.
-            elif Bot.can_buy(current_bot) is True and Bot.can_sell(current_bot) is False:
+            elif Bot.consider_buy(current_bot) is True and Bot.can_sell(current_bot) is False:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy or Pass?")
                 print("Buy")
@@ -227,7 +215,7 @@ class Bot(Player):
                 Bot.bot_buy(current_bot)
                 Menu.clear_console()
             #If bot can buy stock, and has stock to sell based on difficulty, buy sell or pass.
-            elif Bot.can_buy(current_bot) is True and Bot.can_sell(current_bot) is True:
+            elif Bot.consider_buy(current_bot) is True and Bot.can_sell(current_bot) is True:
                 Menu.stat_screen(current_bot, current_round)
                 print("Would you like to Buy, Sell, or Pass?")
                 print("Sell")
@@ -235,28 +223,29 @@ class Bot(Player):
                 Bot.bot_sell(current_bot)
                 Menu.clear_console()
 
-    def same_buy(current_bot):
+    def can_afford(current_bot):
         """Append stocks to Bot.buyable_stocks 
         if stock is within criteria and bot can afford it"""
         Bot.buyable_stocks = [i for i in Bot.buy_list if Stock.stocks[Stock.stock_index(i)].value <= Player.players[current_bot].money]
         return bool(Bot.buyable_stocks)
 
-    def can_buy(current_bot):
+    def consider_buy(current_bot):
+        """Checks if stock prices fall within bot risk setting"""
         if Player.players[current_bot].difficulty == 1:
             Bot.low_risk()
-            if Bot.same_buy(current_bot):
+            if Bot.can_afford(current_bot):
                 return True
             else:
                 return False
         elif Player.players[current_bot].difficulty == 2:
             Bot.medium_risk()
-            if Bot.same_buy(current_bot):
+            if Bot.can_afford(current_bot):
                 return True
             else:
                 return False
         else:
             Bot.high_risk()
-            if Bot.same_buy(current_bot):
+            if Bot.can_afford(current_bot):
                 return True
             else:
                 return False
@@ -275,7 +264,12 @@ class Bot(Player):
         Player.players[current_bot].stocks[buy_name] += buy_number
         time.sleep(Bot.sleep_time)
 
-    def same_sell(current_bot):
+    def bot_holding(current_bot):
+        """returns list of current stocks bot owns"""
+        holding = [i for i in Stock.stock_name if Player.players[current_bot].stocks[i] > 0]
+        return holding
+
+    def hasto_sell(current_bot):
         """Checks contents of sell_list, 
         compares it against current bot held stocks. 
         if any matching, adds to sellable_stocks list."""
@@ -292,13 +286,13 @@ class Bot(Player):
         contents of sell list."""
         if Player.players[current_bot].difficulty == 1:
             Bot.low_risk()
-            if Bot.same_sell(current_bot):
+            if Bot.hasto_sell(current_bot):
                 return True
             else:
                 return False
         elif Player.players[current_bot].difficulty == 2:
             Bot.medium_risk()
-            if Bot.same_sell(current_bot):
+            if Bot.hasto_sell(current_bot):
                 return True
             else:
                 return False
@@ -306,7 +300,7 @@ class Bot(Player):
             return False
 
     def bot_sell(current_bot):
-        """Low risk level sell stock method"""
+        """Bot sell stock method."""
         print("Which stock would you like to sell?")
         sell_name = random.choice(Bot.sell_list)
         print(sell_name)
@@ -396,7 +390,21 @@ class Dice:
         elif action == Dice.action[1]:
             Stock.decrease_value(stock, amount)
         else:
-            Player.dividend(stock, amount)
+            Dice.dividend(stock, amount)
+
+    def dividend(stock, div_roll):
+        """Called from Dice.roll(), handles issuing players holding selected stock bonus funds"""
+        dividend = (div_roll / 100) + 1
+        if Stock.stocks[Stock.stock_index(stock)].value >= 100:
+            print(f"{stock} will pay out {div_roll}%.")
+            for i, v in enumerate(Player.players):
+                bonus = Player.players[i].stocks[stock] * dividend
+                Player.players[i].money = Player.players[i].money + int(bonus)
+                Player.players[i].money = int(Player.players[i].money)
+                print(f"{Player.players[i].name} received ${int(bonus)}.")
+        else:
+            print(f"{stock} is under 100 and will not payout.")
+            return None
 
 class Menu:
     "All menu screens"
@@ -409,18 +417,21 @@ class Menu:
 
     #These are all various answers to ask_question()
     stocks = Stock.stock_name
-    action = ["Buy", "Sell", "Pass", ""]
-    amount = [i for i in range(1, 10001)]
-    num_player = [i for i in range(1, 9)]
-    num_bot = [i for i in range(1, 9)]
-    num_human = [i for i in range(2, 9)]
-    menu = [i for i in range(1, 4)]
-    name = "name"
+    action = ["Buy", "Sell", "Pass", ""] #In-game inputs during each human turn.
+    amount = [i for i in range(1, 10001)] #Min/max rounds allowable
+    num_player = [i for i in range(1, 9)] #Maximum amount of players allowable
+    num_bot = [i for i in range(1, 9)] #Maximum amount of bots allowable
+    num_human = [i for i in range(2, 9)] #Maximum amount of humans allowable
+    menu = [i for i in range(1, 4)] #In-game inputs during game setup
+    name = "name" #
     numhumans_response = (8 - num_bots)
 
     def clear_console():
+        """Clears console of all text.
+        clear - Unix based systems
+        cls - Windows systems"""
         command = 'clear'
-        if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+        if os.name in ('nt', 'dos'):
             command = 'cls'
         os.system(command)
 
@@ -446,7 +457,8 @@ class Menu:
             exit()
 
     def setup_game():
-        """Begins a new game where users can choose number of players, rounds, and player names."""
+        """Begins a new game where users can choose 
+        number of players, rounds, and player names."""
         
         #Populate Stock.stocks list with stock data
         Stock.create_stocks()
@@ -458,10 +470,10 @@ class Menu:
         #Name bot and human players:
         #Only bots        
         if Menu.num_bots > 0 and Menu.num_humans == 0:
-            Player.name_bots(Menu.num_bots)
+            Bot.name_bots(Menu.num_bots)
         #Bots and humans
         elif Menu.num_bots > 0 and Menu.num_humans > 0:
-            Player.name_bots(Menu.num_bots)
+            Bot.name_bots(Menu.num_bots)
             Player.name_humans(Menu.num_players)
         #Only humans
         else:
@@ -482,25 +494,29 @@ class Menu:
         #Bots only
         if Menu.num_bots > 0 and Menu.num_humans == 0:
             for current_player in range(Menu.num_bots):
-                Menu.clear_console()
-                Menu.stat_screen(current_player)
-                Bot.bot_start(current_player)
+                while Player.players[current_player].money > 0:
+                    Menu.clear_console()
+                    Menu.stat_screen(current_player)
+                    Bot.bot_start(current_player)
         #Bots and humans
         elif Menu.num_bots > 0 and Menu.num_humans > 0:
             for current_player in range(Menu.num_bots):
-                Menu.clear_console()
-                Menu.stat_screen(current_player)
-                Bot.bot_start(current_player)
+                while Player.players[current_player].money > 0:
+                    Menu.clear_console()
+                    Menu.stat_screen(current_player)
+                    Bot.bot_start(current_player)
             for current_player in range(Menu.num_bots, Menu.num_players):
-                Menu.clear_console()
-                Menu.stat_screen(current_player)
-                Player.buy_stock(current_player)
+                while Player.players[current_player].money > 0:
+                    Menu.clear_console()
+                    Menu.stat_screen(current_player)
+                    Player.buy_stock(current_player)
         #Humans only
         elif Menu.num_bots == 0 and Menu.num_humans > 0: 
             for current_player in range(0, Menu.num_players):
-                Menu.clear_console()
-                Menu.stat_screen(current_player)
-                Player.buy_stock(current_player)
+                while Player.players[current_player].money > 0:
+                    Menu.clear_console()
+                    Menu.stat_screen(current_player)
+                    Player.buy_stock(current_player)
         Menu.clear_console()
 
         #Run the main game now:
@@ -569,7 +585,8 @@ class Menu:
                     playing = False
                 
     def end_game():
-        """Runs end of game final score, with winner and loser."""
+        """Runs end of game final score, 
+        as well as displaying rankings."""
         #Loops through each player, adds stock value to money, displays total money
         ranking = {}
         for i, c in enumerate(Player.players):
@@ -616,9 +633,9 @@ class Menu:
             """)
         choice = int(Menu.ask_question(f"Please select an option: {min(Menu.menu)} - {max(Menu.menu)}\n", Menu.menu))
         if choice == 1:
-            Menu.num_bots = Player.create_bots(1)
+            Menu.num_bots = Bot.create_bots(1)
         elif choice == 2:
-            Menu.num_bots = Player.create_bots(2)
+            Menu.num_bots = Bot.create_bots(2)
             Menu.num_humans = Player.create_humans(2)
         else:
             Menu.num_humans = Player.create_humans(3)
@@ -629,7 +646,8 @@ class Menu:
         Menu.rounds = rounds
 
     def stat_screen(current_player, current_round = False, dice_outcome = False):
-        """Displays all viable information like play, stock, current round and dice roll."""
+        """Displays all viable information like 
+        play, stock, current round and dice roll."""
         #Setup game section
         if current_round == False and dice_outcome == False:
             Menu.player_info(current_player)
@@ -661,17 +679,20 @@ class Menu:
             print(f"{str(Stock.stocks[i].name).ljust(11,'-')}{Stock.stocks[i].value}")
 
     def ask_question(question, answers):
-        """test = ask_question("What question?", ["y","n"])"""
+        """Handles all user input with custom input possibility"""
         asking = True
         while asking:
             response = input(f"{question}")
             if response.isdigit():
                 response = int(response)
-                return response
+                if response in answers:
+                    return response
+                else:
+                    print("That's not a proper choice!")
             elif response.capitalize() in answers:
                 asking = False
                 return response
-            elif answers == Menu.name:
+            elif answers == "name":
                 return response
             else:
                 print("That's not a proper choice!")
